@@ -1,4 +1,4 @@
-package com.dshagapps.tupanakuy.ui.theme
+package com.dshagapps.tupanakuy.common.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

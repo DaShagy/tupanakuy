@@ -1,4 +1,4 @@
-package com.dshagapps.tupanakuy.ui.theme
+package com.dshagapps.tupanakuy.common.ui.theme
 
 import android.app.Activity
 import android.os.Build
