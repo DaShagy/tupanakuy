@@ -27,7 +27,8 @@ import kotlinx.coroutines.flow.StateFlow
 fun MainScreen(
     state: StateFlow<MainScreenViewModel.State>,
     updateState: (MainScreenViewModel.State) -> Unit = {},
-    onScreenResume: () -> Unit = {}
+    onScreenResume: () -> Unit = {},
+    onFormButtonClick: (String, String) -> Unit = { _, _ -> }
 ) {
     val context: Context = LocalContext.current
 
@@ -42,20 +43,28 @@ fun MainScreen(
         MainScreenViewModel.State.Idle -> {
             BaseScreen(title = stringResource(id = R.string.app_name) ) {
                 Box(
-                    modifier = Modifier.fillMaxWidth(0.67f).fillMaxHeight(),
+                    modifier = Modifier
+                        .fillMaxWidth(0.67f)
+                        .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
+                    val emailFieldState = TextFieldState(
+                        label = "email",
+                        _validator = { !Validator.validateEmail(it) }
+                    )
+                    val passwordFieldState = TextFieldState(
+                        label = "password",
+                        _validator = { !Validator.validatePassword(it) }
+                    )
                     UserForm(
-                        emailFieldState = TextFieldState(
-                            label = "email",
-                            _validator = { !Validator.validateEmail(it) }
-                        ),
-                        passwordFieldState = TextFieldState(
-                            label = "password",
-                            _validator = { !Validator.validatePassword(it) }
-                        ),
+                        emailFieldState = emailFieldState,
+                        passwordFieldState = passwordFieldState,
                         buttonState = ButtonState(
-                            label = "Sign In"
+                            label = "Sign In",
+                            onClick = {
+                                if (!emailFieldState.isError && !passwordFieldState.isError)
+                                    onFormButtonClick(emailFieldState.value, passwordFieldState.value)
+                            }
                         )
                     )
                 }
