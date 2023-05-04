@@ -13,7 +13,9 @@ import androidx.navigation.compose.rememberNavController
 import com.dshagapps.tupanakuy.common.navigation.AppScreen
 import com.dshagapps.tupanakuy.common.navigation.addFeedScreenGraph
 import com.dshagapps.tupanakuy.common.ui.theme.TupanakuyTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

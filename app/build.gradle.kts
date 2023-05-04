@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
     id("com.google.gms.google-services")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -58,9 +59,14 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.0.0-alpha11")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
-    implementation("androidx.navigation:navigation-common-ktx:2.4.1")
-    implementation("androidx.navigation:navigation-runtime-ktx:2.4.1")
-    implementation("androidx.navigation:navigation-compose:2.4.1")
+    implementation("androidx.navigation:navigation-common-ktx:${rootProject.ext.get("compose_version")}")
+    implementation("androidx.navigation:navigation-runtime-ktx:${rootProject.ext.get("compose_version")}")
+    implementation("androidx.navigation:navigation-compose:${rootProject.ext.get("compose_version")}")
+
+    //Hilt
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation("com.google.dagger:hilt-android:${rootProject.ext.get("dagger_hilt_version")}")
+    kapt( "com.google.dagger:hilt-android-compiler:${rootProject.ext.get("dagger_hilt_version")}")
 
     implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
     implementation ("com.google.firebase:firebase-auth-ktx")
