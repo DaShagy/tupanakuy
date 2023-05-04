@@ -20,6 +20,7 @@ import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
+import com.dshagapps.tupanakuy.common.util.Validator
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -45,9 +46,17 @@ fun MainScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     UserForm(
-                        emailFieldState = TextFieldState(label = "email"),
-                        passwordFieldState = TextFieldState(label = "password"),
-                        buttonState = ButtonState(label = "Sign In")
+                        emailFieldState = TextFieldState(
+                            label = "email",
+                            _validator = { !Validator.validateEmail(it) }
+                        ),
+                        passwordFieldState = TextFieldState(
+                            label = "password",
+                            _validator = { !Validator.validatePassword(it) }
+                        ),
+                        buttonState = ButtonState(
+                            label = "Sign In"
+                        )
                     )
                 }
             }

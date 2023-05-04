@@ -39,7 +39,10 @@ fun UserForm(
                 .fillMaxWidth()
                 .padding(4.dp)
         ) {
-            StateButton(buttonState)
+            StateButton(
+                state = buttonState,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
