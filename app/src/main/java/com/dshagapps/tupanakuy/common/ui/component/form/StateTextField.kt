@@ -4,11 +4,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.dshagapps.tupanakuy.common.ui.util.FieldState
+import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 
 @Composable
 fun StateTextField(
-    state: FieldState,
+    state: TextFieldState,
     modifier: Modifier = Modifier
 ) {
     TextField(

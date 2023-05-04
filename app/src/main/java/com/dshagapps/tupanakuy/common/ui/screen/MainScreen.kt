@@ -4,9 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -18,7 +16,8 @@ import com.dshagapps.tupanakuy.R
 import com.dshagapps.tupanakuy.common.ui.component.form.UserForm
 import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
-import com.dshagapps.tupanakuy.common.ui.util.FieldState
+import com.dshagapps.tupanakuy.common.ui.util.ButtonState
+import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -46,10 +45,9 @@ fun MainScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     UserForm(
-                        emailFieldState = FieldState(label = "email"),
-                        passwordFieldState = FieldState(label = "password"),
-                        onButtonClick = {},
-                        buttonLabel = "Sign In"
+                        emailFieldState = TextFieldState(label = "email"),
+                        passwordFieldState = TextFieldState(label = "password"),
+                        buttonState = ButtonState(label = "Sign In")
                     )
                 }
             }
