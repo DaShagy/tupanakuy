@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -55,11 +56,14 @@ dependencies {
     implementation("androidx.compose.ui:ui:1.2.0")
     implementation("androidx.compose.ui:ui-tooling-preview:1.2.0")
     implementation("androidx.compose.material3:material3:1.0.0-alpha11")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     implementation("androidx.navigation:navigation-common-ktx:2.4.1")
     implementation("androidx.navigation:navigation-runtime-ktx:2.4.1")
     implementation("androidx.navigation:navigation-compose:2.4.1")
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.0.0"))
+    implementation ("com.google.firebase:firebase-auth-ktx")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
