@@ -12,7 +12,8 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
         val viewModel: MainScreenViewModel = hiltViewModel()
         MainScreen(
             state = viewModel.state,
-            updateState = { newState -> viewModel.updateState(newState) }
+            updateState = { newState -> viewModel.updateState(newState) },
+            onScreenResume = { viewModel.checkAuthState() }
         )
     }
 }
