@@ -20,26 +20,29 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun SplashScreen(
     state: StateFlow<SplashScreenViewModel.State>,
-    updateState: (SplashScreenViewModel.State) -> Unit = {},
-    onSplashScreenFinish: () -> Unit = {}
+    goToAuthScreen: () -> Unit = {},
+    goToMainScreen: () -> Unit = {}
 ) {
 
-    when (state.collectAsState().value) {
-        SplashScreenViewModel.State.GoToMainScreen -> {
+    when (val s = state.collectAsState().value) {
+        is SplashScreenViewModel.State.Start -> {
+            StartSplashScreen(state = s)
+        }
+        SplashScreenViewModel.State.GoToAuthScreen -> {
             LaunchedEffect(Unit) {
-                onSplashScreenFinish()
+                goToAuthScreen()
             }
         }
-        SplashScreenViewModel.State.Start -> {
-            StartSplashScreen(updateState)
+        SplashScreenViewModel.State.GoToMainScreen -> {
+            LaunchedEffect(Unit) {
+                goToMainScreen()
+            }
         }
     }
 }
 
 @Composable
-fun StartSplashScreen(
-    updateState: (SplashScreenViewModel.State) -> Unit
-) {
+fun StartSplashScreen(state: SplashScreenViewModel.State.Start) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -54,6 +57,6 @@ fun StartSplashScreen(
 
     LaunchedEffect(Unit) {
         delay(3000)
-        updateState(SplashScreenViewModel.State.GoToMainScreen)
+        state.checkAuthState()
     }
 }
