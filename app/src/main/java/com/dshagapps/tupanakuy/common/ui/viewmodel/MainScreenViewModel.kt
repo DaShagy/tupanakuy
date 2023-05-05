@@ -32,7 +32,7 @@ class MainScreenViewModel @Inject constructor(
 
     sealed class State {
         object Loading: State()
-        object Idle: State()
+        data class Idle(val uid: String): State()
         object OnSignOut: State()
     }
 }

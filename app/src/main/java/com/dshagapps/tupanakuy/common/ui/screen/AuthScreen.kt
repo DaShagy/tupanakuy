@@ -27,7 +27,7 @@ fun AuthScreen(
     updateState: (AuthScreenViewModel.State) -> Unit = {},
     onSignUpButtonClick: (String, String) -> Unit = { _, _ -> },
     onSignInButtonClick: (String, String) -> Unit = { _, _ -> },
-    goToMainScreen: () -> Unit = {}
+    goToMainScreen: (String) -> Unit = {}
 ) {
     val context: Context = LocalContext.current
 
@@ -48,7 +48,7 @@ fun AuthScreen(
         }
         is AuthScreenViewModel.State.OnSuccess -> {
             LaunchedEffect(Unit) {
-                goToMainScreen()
+                goToMainScreen(s.user.uid)
             }
         }
         is AuthScreenViewModel.State.OnSignInButtonClick -> {

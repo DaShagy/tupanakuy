@@ -19,18 +19,19 @@ fun MainScreen(
     state: StateFlow<MainScreenViewModel.State>,
     updateState: (MainScreenViewModel.State) -> Unit = {},
     onSignOutButtonClick: () -> Unit = {},
-    goToAuthScreen: () -> Unit = {}
+    goToAuthScreen: () -> Unit = {},
+    uid: String
 ) {
 
     OnLifecycleEvent { _, event ->
         when (event) {
-            Lifecycle.Event.ON_RESUME -> updateState(MainScreenViewModel.State.Idle)
+            Lifecycle.Event.ON_RESUME -> updateState(MainScreenViewModel.State.Idle(uid))
             else -> Unit
         }
     }
 
-    when (state.collectAsState().value) {
-        MainScreenViewModel.State.Idle -> {
+    when (val s = state.collectAsState().value) {
+        is MainScreenViewModel.State.Idle -> {
             BaseScreen(
                 title = stringResource(id = R.string.app_name),
                 buttonStates = arrayOf(
@@ -41,7 +42,7 @@ fun MainScreen(
                     )
                 )
             ) {
-                Text("Main Screen")
+                Text("UID: ${s.uid}")
             }
         }
         MainScreenViewModel.State.Loading -> Loader()

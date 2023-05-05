@@ -17,7 +17,7 @@ class SplashScreenViewModel @Inject constructor(
     private val checkAuthStateUseCase: CheckAuthStateUseCase
 ): ViewModel() {
 
-    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Start { checkAuthState() })
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Start)
     val state: StateFlow<State> get() = _state
 
     fun updateState(newState: State){
@@ -25,15 +25,15 @@ class SplashScreenViewModel @Inject constructor(
     }
 
     fun checkAuthState() = viewModelScope.launch {
-        when (withContext(Dispatchers.IO) { checkAuthStateUseCase() }) {
+        when (val result = withContext(Dispatchers.IO) { checkAuthStateUseCase() }) {
             is OperationResult.Failure -> updateState(State.GoToAuthScreen)
-            is OperationResult.Success -> updateState(State.GoToMainScreen)
+            is OperationResult.Success -> updateState(State.GoToMainScreen(result.data.uid))
         }
     }
 
     sealed class State {
-        data class Start(val checkAuthState: () -> Unit = {}): State()
+        object Start: State()
         object GoToAuthScreen: State()
-        object GoToMainScreen: State()
+        data class GoToMainScreen(val uid: String): State()
     }
 }

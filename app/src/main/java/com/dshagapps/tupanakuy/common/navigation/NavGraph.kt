@@ -3,7 +3,10 @@ package com.dshagapps.tupanakuy.common.navigation
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.UID_ARGUMENT
 import com.dshagapps.tupanakuy.common.ui.screen.AuthScreen
 import com.dshagapps.tupanakuy.common.ui.screen.MainScreen
 import com.dshagapps.tupanakuy.common.ui.screen.SplashScreen
@@ -16,13 +19,14 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
         val viewModel: SplashScreenViewModel = hiltViewModel()
         SplashScreen(
             state = viewModel.state,
+            checkAuthState = { viewModel.checkAuthState() },
             goToAuthScreen = {
                 navController.popBackStack()
                 navController.navigate(AppScreen.Auth.route)
             },
-            goToMainScreen = {
+            goToMainScreen = { uid ->
                 navController.popBackStack()
-                navController.navigate(AppScreen.Main.route)
+                navController.navigate(AppScreen.Main.createRoute(uid))
             }
         )
     }
@@ -37,14 +41,23 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             onSignInButtonClick = { email, password ->
                 viewModel.signIn(email, password)
             },
-            goToMainScreen = {
+            goToMainScreen = { uid ->
                 navController.popBackStack()
-                navController.navigate(AppScreen.Main.route)
+                navController.navigate(AppScreen.Main.createRoute(uid))
             }
         )
     }
-    composable(route = AppScreen.Main.route) {
+    composable(
+        route = AppScreen.Main.route,
+        arguments = listOf(
+            navArgument(UID_ARGUMENT) { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
         val viewModel: MainScreenViewModel = hiltViewModel()
+
+        val uid = backStackEntry.arguments?.getString(UID_ARGUMENT)
+        requireNotNull(uid)
+
         MainScreen(
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
@@ -52,7 +65,8 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             goToAuthScreen = {
                 navController.popBackStack()
                 navController.navigate(AppScreen.Auth.route)
-            }
+            },
+            uid = uid
         )
     }
 }
