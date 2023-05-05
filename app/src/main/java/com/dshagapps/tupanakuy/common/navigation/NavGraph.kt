@@ -5,9 +5,22 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.dshagapps.tupanakuy.common.ui.screen.MainScreen
+import com.dshagapps.tupanakuy.common.ui.screen.SplashScreen
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
+import com.dshagapps.tupanakuy.common.ui.viewmodel.SplashScreenViewModel
 
 fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
+    composable(route = AppScreen.Splash.route) {
+        val viewModel: SplashScreenViewModel = hiltViewModel()
+        SplashScreen(
+            state = viewModel.state,
+            updateState = { newState -> viewModel.updateState(newState) },
+            onSplashScreenFinish = {
+                navController.popBackStack()
+                navController.navigate(AppScreen.Main.route)
+            }
+        )
+    }
     composable(route = AppScreen.Main.route) {
         val viewModel: MainScreenViewModel = hiltViewModel()
         MainScreen(

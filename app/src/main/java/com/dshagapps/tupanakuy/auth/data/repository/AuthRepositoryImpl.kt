@@ -1,7 +1,7 @@
 package com.dshagapps.tupanakuy.auth.data.repository
 
 import com.dshagapps.tupanakuy.auth.data.mapper.toDomainUser
-import com.dshagapps.tupanakuy.auth.domain.model.User
+import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.auth.domain.repository.AuthRepository
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import com.google.firebase.auth.FirebaseAuth

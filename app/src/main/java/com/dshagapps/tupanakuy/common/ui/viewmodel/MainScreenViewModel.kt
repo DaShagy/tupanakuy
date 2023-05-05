@@ -2,7 +2,7 @@ package com.dshagapps.tupanakuy.common.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dshagapps.tupanakuy.auth.domain.model.User
+import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.auth.domain.use_case.CheckAuthStateUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignInUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase

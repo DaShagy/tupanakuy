@@ -1,6 +1,6 @@
 package com.dshagapps.tupanakuy.auth.domain.repository
 
-import com.dshagapps.tupanakuy.auth.domain.model.User
+import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.util.OperationResult
 
 interface AuthRepository {

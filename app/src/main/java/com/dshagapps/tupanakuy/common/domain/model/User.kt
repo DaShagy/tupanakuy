@@ -1,4 +1,4 @@
-package com.dshagapps.tupanakuy.auth.domain.model
+package com.dshagapps.tupanakuy.common.domain.model
 
 data class User(
     val uid: String = "",

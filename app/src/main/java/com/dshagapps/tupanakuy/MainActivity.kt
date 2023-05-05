@@ -38,7 +38,7 @@ fun App() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Main.route
+        startDestination = AppScreen.Splash.route
     ) {
         addFeedScreenGraph(navController)
     }
