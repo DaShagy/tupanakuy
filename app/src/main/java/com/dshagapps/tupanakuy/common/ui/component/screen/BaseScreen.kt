@@ -13,32 +13,33 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import com.dshagapps.tupanakuy.common.ui.component.button.StateButton
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreenId.BUTTONS_LAYOUT_ID
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreenId.CONTENT_LAYOUT_ID
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreenId.TITLE_LAYOUT_ID
 import com.dshagapps.tupanakuy.common.ui.theme.TupanakuyTheme
+import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.ThemeProvider
 
 @Composable
 fun BaseScreen(
     modifier: Modifier = Modifier,
     title: String = "",
+    vararg buttonStates: ButtonState,
     content: @Composable RowScope.() -> Unit
 ) {
     ConstraintLayout(
         modifier = modifier.fillMaxSize(),
         constraintSet = getBaseScreenConstraintSet()
     ) {
-        if (title != "") {
-            Row(
-                modifier = modifier
-                    .layoutId(TITLE_LAYOUT_ID)
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(text = title)
-            }
+        Row(
+            modifier = modifier
+                .layoutId(TITLE_LAYOUT_ID)
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = title)
         }
         Row(
             modifier = modifier
@@ -50,9 +51,15 @@ fun BaseScreen(
             content()
         }
         Row(
-            modifier = modifier.layoutId(BUTTONS_LAYOUT_ID)
+            modifier = modifier
+                .layoutId(BUTTONS_LAYOUT_ID)
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(text = title)
+            buttonStates.forEach {
+                StateButton(it)
+            }
         }
     }
 }
@@ -100,7 +107,6 @@ private fun getBaseScreenConstraintSet() = ConstraintSet {
         top.linkTo(contentLayout.bottom)
         end.linkTo(parent.end)
         bottom.linkTo(parent.bottom)
-        width = Dimension.fillToConstraints
     }
 }
 

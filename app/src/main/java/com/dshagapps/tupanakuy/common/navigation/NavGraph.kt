@@ -14,8 +14,14 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
             onScreenResume = { viewModel.checkAuthState() },
-            onFormButtonClick = { email, password ->
+            onSignUpButtonClick = { email, password ->
                 viewModel.signUp(email, password)
+            },
+            onSignInButtonClick = { email, password ->
+                viewModel.signIn(email, password)
+            },
+            onSignOutButtonClick = {
+                viewModel.signOut()
             }
         )
     }

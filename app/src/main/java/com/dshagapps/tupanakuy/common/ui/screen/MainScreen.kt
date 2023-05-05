@@ -16,11 +16,8 @@ import com.dshagapps.tupanakuy.R
 import com.dshagapps.tupanakuy.common.ui.component.form.UserForm
 import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
-import com.dshagapps.tupanakuy.common.ui.util.ButtonState
-import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
-import com.dshagapps.tupanakuy.common.util.Validator
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -28,7 +25,9 @@ fun MainScreen(
     state: StateFlow<MainScreenViewModel.State>,
     updateState: (MainScreenViewModel.State) -> Unit = {},
     onScreenResume: () -> Unit = {},
-    onFormButtonClick: (String, String) -> Unit = { _, _ -> }
+    onSignUpButtonClick: (String, String) -> Unit = { _, _ -> },
+    onSignInButtonClick: (String, String) -> Unit = { _, _ -> },
+    onSignOutButtonClick: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
 
@@ -40,46 +39,58 @@ fun MainScreen(
     }
 
     when (val s = state.collectAsState().value) {
-        MainScreenViewModel.State.Idle -> {
-            BaseScreen(title = stringResource(id = R.string.app_name) ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.67f)
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    val emailFieldState = TextFieldState(
-                        label = "email",
-                        _validator = { !Validator.validateEmail(it) }
-                    )
-                    val passwordFieldState = TextFieldState(
-                        label = "password",
-                        _validator = { !Validator.validatePassword(it) }
-                    )
-                    UserForm(
-                        emailFieldState = emailFieldState,
-                        passwordFieldState = passwordFieldState,
-                        buttonState = ButtonState(
-                            label = "Sign In",
-                            onClick = {
-                                if (!emailFieldState.isError && !passwordFieldState.isError)
-                                    onFormButtonClick(emailFieldState.value, passwordFieldState.value)
-                            }
-                        )
-                    )
-                }
-            }
-        }
         MainScreenViewModel.State.Loading -> {
             Loader()
         }
         is MainScreenViewModel.State.OnError -> {
             Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
-            updateState(MainScreenViewModel.State.Idle)
+            updateState(MainScreenViewModel.State.DrawAuthForm.loginForm(updateState))
         }
         is MainScreenViewModel.State.OnSuccess -> {
             Toast.makeText(context, s.user.uid, Toast.LENGTH_SHORT).show()
-            updateState(MainScreenViewModel.State.Idle)
+            updateState(
+                MainScreenViewModel.State.DrawAuthForm.loginForm(
+                    updateState = updateState,
+                    user = s.user
+                )
+            )
+        }
+        MainScreenViewModel.State.OnSignOut -> {
+            Toast.makeText(context, "Sign out successful", Toast.LENGTH_SHORT).show()
+            updateState(MainScreenViewModel.State.DrawAuthForm.loginForm(updateState))
+        }
+        is MainScreenViewModel.State.OnSignInButtonClick -> {
+            onSignInButtonClick(s.email, s.password)
+        }
+        MainScreenViewModel.State.OnSignOutButtonClick -> {
+            onSignOutButtonClick()
+        }
+        is MainScreenViewModel.State.OnSignUpButtonClick -> {
+            onSignUpButtonClick(s.email, s.password)
+        }
+        is MainScreenViewModel.State.DrawAuthForm -> {
+            AuthForm(state = s)
+        }
+    }
+}
+
+@Composable
+fun AuthForm(state: MainScreenViewModel.State.DrawAuthForm) {
+    BaseScreen(
+        title = stringResource(id = R.string.app_name),
+        buttonStates = state.screenButtonStates
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.67f)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            UserForm(
+                emailFieldState = state.emailFieldState,
+                passwordFieldState = state.passwordFieldState,
+                buttonState = state.formButtonState
+            )
         }
     }
 }
