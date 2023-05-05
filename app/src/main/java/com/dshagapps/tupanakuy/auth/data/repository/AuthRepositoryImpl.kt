@@ -7,10 +7,7 @@ import com.dshagapps.tupanakuy.common.util.OperationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class AuthRepositoryImpl(
-    private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
-): AuthRepository {
+class AuthRepositoryImpl(private val auth: FirebaseAuth): AuthRepository {
     override fun checkAuthState(): OperationResult<User> {
         val currentUser = auth.currentUser
         return currentUser?.let { OperationResult.Success(it.toDomainUser()) }
