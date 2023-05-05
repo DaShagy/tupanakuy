@@ -6,6 +6,7 @@ import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignInUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignUpUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.CheckUserInfoUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoUseCase
 import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
@@ -24,6 +25,7 @@ class AuthScreenViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase,
     private val signUpUseCase: SignUpUseCase,
     private val signOutUseCase: SignOutUseCase,
+    private val checkUserInfoUseCase: CheckUserInfoUseCase,
     private val setUserInfoUseCase: SetUserInfoUseCase
 ): ViewModel() {
 
@@ -38,17 +40,28 @@ class AuthScreenViewModel @Inject constructor(
         viewModelScope.launch {
             updateState(State.Loading)
             withContext(Dispatchers.IO) {
-                signUpUseCase(email, password){ result ->
+                signUpUseCase(email, password) { result ->
                     when (result) {
                         is OperationResult.Failure -> updateState(State.OnError(result.exception))
                         is OperationResult.Success -> {
-                            setUserInfoUseCase(result.data) { setInfoResult ->
-                                when (setInfoResult) {
+                            checkUserInfoUseCase(result.data.uid) { checkUserInfoResult ->
+                                when (checkUserInfoResult) {
                                     is OperationResult.Failure -> {
-                                        signOutUseCase()
-                                        updateState(State.OnError(setInfoResult.exception))
+                                        setUserInfoUseCase(result.data) { setUserInfoResult ->
+                                            when (setUserInfoResult) {
+                                                is OperationResult.Failure -> {
+                                                    signOutUseCase()
+                                                    updateState(State.OnError(setUserInfoResult.exception))
+                                                }
+                                                is OperationResult.Success -> {
+                                                    updateState(State.OnSuccess(setUserInfoResult.data))
+                                                }
+                                            }
+                                        }
                                     }
-                                    is OperationResult.Success -> updateState(State.OnSuccess(setInfoResult.data))
+                                    is OperationResult.Success -> {
+                                        updateState(State.OnSuccess(result.data))
+                                    }
                                 }
                             }
                         }
@@ -61,17 +74,28 @@ class AuthScreenViewModel @Inject constructor(
         viewModelScope.launch {
             updateState(State.Loading)
             withContext(Dispatchers.IO) {
-                signInUseCase(email, password){ result ->
+                signInUseCase(email, password) { result ->
                     when (result) {
                         is OperationResult.Failure -> updateState(State.OnError(result.exception))
                         is OperationResult.Success -> {
-                            setUserInfoUseCase(result.data) { setInfoResult ->
-                                when (setInfoResult) {
+                            checkUserInfoUseCase(result.data.uid) { checkUserInfoResult ->
+                                when (checkUserInfoResult) {
                                     is OperationResult.Failure -> {
-                                        signOutUseCase()
-                                        updateState(State.OnError(setInfoResult.exception))
+                                        setUserInfoUseCase(result.data) { setUserInfoResult ->
+                                            when (setUserInfoResult) {
+                                                is OperationResult.Failure -> {
+                                                    signOutUseCase()
+                                                    updateState(State.OnError(setUserInfoResult.exception))
+                                                }
+                                                is OperationResult.Success -> {
+                                                    updateState(State.OnSuccess(setUserInfoResult.data))
+                                                }
+                                            }
+                                        }
                                     }
-                                    is OperationResult.Success -> updateState(State.OnSuccess(setInfoResult.data))
+                                    is OperationResult.Success -> {
+                                        updateState(State.OnSuccess(result.data))
+                                    }
                                 }
                             }
                         }

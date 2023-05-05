@@ -29,4 +29,18 @@ object FirebaseExtensions {
                 listener(OperationResult.Failure(exception))
             }
     }
+
+    inline fun <reified T> DocumentReference.checkIfDomainEntityExists(crossinline onCompleteListener: (OperationResult<Unit>) -> Unit) {
+        this.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                if (task.result.exists()) {
+                    onCompleteListener(OperationResult.Success(Unit))
+                } else {
+                    onCompleteListener(OperationResult.Failure(Exception("Document does not exist")))
+                }
+            } else {
+                onCompleteListener(OperationResult.Failure(task.exception ?: Exception("Unknown error")))
+            }
+        }
+    }
 }

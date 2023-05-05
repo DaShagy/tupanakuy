@@ -1,5 +1,6 @@
 package com.dshagapps.tupanakuy.common.data.repository
 
+import com.dshagapps.tupanakuy.common.data.repository.util.FirebaseExtensions.checkIfDomainEntityExists
 import com.dshagapps.tupanakuy.common.data.repository.util.FirebaseExtensions.getDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirebaseExtensions.setDomainEntity
 import com.dshagapps.tupanakuy.common.domain.model.User
@@ -14,5 +15,9 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
 
     override fun setUserInfo(user: User, listener: (OperationResult<User>) -> Unit) {
         firestore.collection("users").document(user.uid).setDomainEntity(user, listener)
+    }
+
+    override fun checkUserInfo(uid: String, listener: (OperationResult<Unit>) -> Unit) {
+        firestore.collection("users").document(uid).checkIfDomainEntityExists<User>(listener)
     }
 }
