@@ -7,6 +7,7 @@ import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignUpUseCase
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
 import com.dshagapps.tupanakuy.common.domain.use_case.GetUserInfoUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,5 +33,8 @@ object UseCaseModule {
     //region data_use_cases
     @Provides
     fun providesGetUserInfoUseCase(repository: DataRepository) = GetUserInfoUseCase(repository)
+
+    @Provides
+    fun providesSetUserInfoUseCase(repository: DataRepository) = SetUserInfoUseCase(repository)
     //endregion
 }

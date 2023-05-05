@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignInUseCase
+import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignUpUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoUseCase
 import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 import com.dshagapps.tupanakuy.common.util.OperationResult
@@ -20,7 +22,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthScreenViewModel @Inject constructor(
     private val signInUseCase: SignInUseCase,
-    private val signUpUseCase: SignUpUseCase
+    private val signUpUseCase: SignUpUseCase,
+    private val signOutUseCase: SignOutUseCase,
+    private val setUserInfoUseCase: SetUserInfoUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -37,7 +41,17 @@ class AuthScreenViewModel @Inject constructor(
                 signUpUseCase(email, password){ result ->
                     when (result) {
                         is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                        is OperationResult.Success -> updateState(State.OnSuccess(result.data))
+                        is OperationResult.Success -> {
+                            setUserInfoUseCase(result.data) { setInfoResult ->
+                                when (setInfoResult) {
+                                    is OperationResult.Failure -> {
+                                        signOutUseCase()
+                                        updateState(State.OnError(setInfoResult.exception))
+                                    }
+                                    is OperationResult.Success -> updateState(State.OnSuccess(setInfoResult.data))
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -50,7 +64,17 @@ class AuthScreenViewModel @Inject constructor(
                 signInUseCase(email, password){ result ->
                     when (result) {
                         is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                        is OperationResult.Success -> updateState(State.OnSuccess(result.data))
+                        is OperationResult.Success -> {
+                            setUserInfoUseCase(result.data) { setInfoResult ->
+                                when (setInfoResult) {
+                                    is OperationResult.Failure -> {
+                                        signOutUseCase()
+                                        updateState(State.OnError(setInfoResult.exception))
+                                    }
+                                    is OperationResult.Success -> updateState(State.OnSuccess(setInfoResult.data))
+                                }
+                            }
+                        }
                     }
                 }
             }
