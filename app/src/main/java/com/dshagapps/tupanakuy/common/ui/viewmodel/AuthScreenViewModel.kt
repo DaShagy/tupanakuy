@@ -3,9 +3,7 @@ package com.dshagapps.tupanakuy.common.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dshagapps.tupanakuy.common.domain.model.User
-import com.dshagapps.tupanakuy.auth.domain.use_case.CheckAuthStateUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignInUseCase
-import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignUpUseCase
 import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
@@ -21,10 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthScreenViewModel @Inject constructor(
-    private val checkAuthStateUseCase: CheckAuthStateUseCase,
     private val signInUseCase: SignInUseCase,
-    private val signUpUseCase: SignUpUseCase,
-    private val signOutUseCase: SignOutUseCase
+    private val signUpUseCase: SignUpUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -32,14 +28,6 @@ class AuthScreenViewModel @Inject constructor(
 
     fun updateState(newState: State){
         _state.value = newState
-    }
-
-    fun checkAuthState() = viewModelScope.launch {
-        updateState(State.Loading)
-        when (val result = withContext(Dispatchers.IO) { checkAuthStateUseCase() }){
-            is OperationResult.Failure -> updateState(State.OnError(result.exception))
-            is OperationResult.Success -> updateState(State.OnSuccess(result.data))
-        }
     }
 
     fun signUp(email:String, password:String) =
@@ -68,19 +56,10 @@ class AuthScreenViewModel @Inject constructor(
             }
         }
 
-    fun signOut() = viewModelScope.launch {
-        updateState(State.Loading)
-        when (withContext(Dispatchers.IO) { signOutUseCase() }){
-            else -> updateState(State.OnSignOut)
-        }
-    }
-
-
     sealed class State {
         object Loading: State()
         data class OnSuccess(val user: User): State()
         data class OnError(val exception: Exception): State()
-        object OnSignOut: State()
         data class OnSignUpButtonClick(
             val email: String,
             val password: String
@@ -89,19 +68,14 @@ class AuthScreenViewModel @Inject constructor(
             val email: String,
             val password: String
         ): State()
-        object OnSignOutButtonClick: State()
         class DrawAuthForm private constructor(
             val emailFieldState: TextFieldState = TextFieldState(),
             val passwordFieldState: TextFieldState = TextFieldState(),
             val formButtonState: ButtonState = ButtonState(),
-            val screenButtonStates: Array<ButtonState> = arrayOf(ButtonState()),
-            val user: User? = null
+            val screenButtonStates: Array<ButtonState> = arrayOf(ButtonState())
         ): State() {
             companion object {
-                fun loginForm(
-                    updateState: (State) -> Unit,
-                    user: User? = null
-                ): DrawAuthForm {
+                fun loginForm(updateState: (State) -> Unit): DrawAuthForm {
                     val emailFieldState = TextFieldState(
                         _validator = { !Validator.validateEmail(it) },
                         label = "Email"
@@ -124,25 +98,16 @@ class AuthScreenViewModel @Inject constructor(
                         ),
                         screenButtonStates = arrayOf(
                             ButtonState(
-                                label = "Sign out",
-                                onClick = { updateState(OnSignOut) },
-                                enabled = !user?.uid.isNullOrEmpty()
-                            ),
-                            ButtonState(
                                 label = "Change to Sign Up",
                                 onClick = {
-                                    updateState(signUpForm(updateState, user))
+                                    updateState(signUpForm(updateState))
                                 }
                             ),
-                        ),
-                        user = user
+                        )
                     )
                 }
 
-                fun signUpForm(
-                    updateState: (State) -> Unit,
-                    user: User? = null
-                ): DrawAuthForm {
+                fun signUpForm(updateState: (State) -> Unit): DrawAuthForm {
                     val emailFieldState = TextFieldState(
                         _validator = { !Validator.validateEmail(it) },
                         label = "Email"
@@ -165,16 +130,10 @@ class AuthScreenViewModel @Inject constructor(
                         ),
                         screenButtonStates = arrayOf(
                             ButtonState(
-                                label = "Sign out",
-                                onClick = { updateState(OnSignOut) },
-                                enabled = !user?.uid.isNullOrEmpty()
-                            ),
-                            ButtonState(
                                 label = "Change to Login",
-                                onClick = { updateState(loginForm(updateState, user)) }
+                                onClick = { updateState(loginForm(updateState)) }
                             ),
-                        ),
-                        user = user
+                        )
                     )
                 }
             }

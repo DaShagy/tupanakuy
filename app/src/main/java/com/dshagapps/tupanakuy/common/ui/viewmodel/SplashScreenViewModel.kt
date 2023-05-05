@@ -24,7 +24,7 @@ class SplashScreenViewModel @Inject constructor(
         _state.value = newState
     }
 
-    private fun checkAuthState() = viewModelScope.launch {
+    fun checkAuthState() = viewModelScope.launch {
         when (withContext(Dispatchers.IO) { checkAuthStateUseCase() }) {
             is OperationResult.Failure -> updateState(State.GoToAuthScreen)
             is OperationResult.Success -> updateState(State.GoToMainScreen)

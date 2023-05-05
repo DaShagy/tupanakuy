@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,16 +25,15 @@ import kotlinx.coroutines.flow.StateFlow
 fun AuthScreen(
     state: StateFlow<AuthScreenViewModel.State>,
     updateState: (AuthScreenViewModel.State) -> Unit = {},
-    onScreenResume: () -> Unit = {},
     onSignUpButtonClick: (String, String) -> Unit = { _, _ -> },
     onSignInButtonClick: (String, String) -> Unit = { _, _ -> },
-    onSignOutButtonClick: () -> Unit = {}
+    goToMainScreen: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
 
     OnLifecycleEvent { _, event ->
         when (event){
-            Lifecycle.Event.ON_RESUME -> onScreenResume()
+            Lifecycle.Event.ON_RESUME -> updateState(AuthScreenViewModel.State.DrawAuthForm.loginForm(updateState))
             else -> Unit
         }
     }
@@ -47,23 +47,12 @@ fun AuthScreen(
             updateState(AuthScreenViewModel.State.DrawAuthForm.loginForm(updateState))
         }
         is AuthScreenViewModel.State.OnSuccess -> {
-            Toast.makeText(context, s.user.uid, Toast.LENGTH_SHORT).show()
-            updateState(
-                AuthScreenViewModel.State.DrawAuthForm.loginForm(
-                    updateState = updateState,
-                    user = s.user
-                )
-            )
-        }
-        AuthScreenViewModel.State.OnSignOut -> {
-            Toast.makeText(context, "Sign out successful", Toast.LENGTH_SHORT).show()
-            updateState(AuthScreenViewModel.State.DrawAuthForm.loginForm(updateState))
+            LaunchedEffect(Unit) {
+                goToMainScreen()
+            }
         }
         is AuthScreenViewModel.State.OnSignInButtonClick -> {
             onSignInButtonClick(s.email, s.password)
-        }
-        AuthScreenViewModel.State.OnSignOutButtonClick -> {
-            onSignOutButtonClick()
         }
         is AuthScreenViewModel.State.OnSignUpButtonClick -> {
             onSignUpButtonClick(s.email, s.password)

@@ -2,12 +2,14 @@ package com.dshagapps.tupanakuy.common.ui.screen
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import com.dshagapps.tupanakuy.R
 import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
+import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,9 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun MainScreen(
     state: StateFlow<MainScreenViewModel.State>,
-    updateState: (MainScreenViewModel.State) -> Unit = {}
+    updateState: (MainScreenViewModel.State) -> Unit = {},
+    onSignOutButtonClick: () -> Unit = {},
+    goToAuthScreen: () -> Unit = {}
 ) {
 
     OnLifecycleEvent { _, event ->
@@ -28,11 +32,23 @@ fun MainScreen(
     when (state.collectAsState().value) {
         MainScreenViewModel.State.Idle -> {
             BaseScreen(
-                title = stringResource(id = R.string.app_name)
+                title = stringResource(id = R.string.app_name),
+                buttonStates = arrayOf(
+                    ButtonState(
+                        label = "Sign out",
+                        onClick = onSignOutButtonClick,
+                        enabled = true
+                    )
+                )
             ) {
                 Text("Main Screen")
             }
         }
         MainScreenViewModel.State.Loading -> Loader()
+        MainScreenViewModel.State.OnSignOut -> {
+            LaunchedEffect(Unit) {
+                goToAuthScreen()
+            }
+        }
     }
 }

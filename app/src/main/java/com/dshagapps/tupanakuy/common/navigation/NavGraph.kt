@@ -31,15 +31,15 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
         AuthScreen(
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
-            onScreenResume = { viewModel.checkAuthState() },
             onSignUpButtonClick = { email, password ->
                 viewModel.signUp(email, password)
             },
             onSignInButtonClick = { email, password ->
                 viewModel.signIn(email, password)
             },
-            onSignOutButtonClick = {
-                viewModel.signOut()
+            goToMainScreen = {
+                navController.popBackStack()
+                navController.navigate(AppScreen.Main.route)
             }
         )
     }
@@ -47,7 +47,12 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
         val viewModel: MainScreenViewModel = hiltViewModel()
         MainScreen(
             state = viewModel.state,
-            updateState = { newState -> viewModel.updateState(newState) }
+            updateState = { newState -> viewModel.updateState(newState) },
+            onSignOutButtonClick = { viewModel.signOut() },
+            goToAuthScreen = {
+                navController.popBackStack()
+                navController.navigate(AppScreen.Auth.route)
+            }
         )
     }
 }
