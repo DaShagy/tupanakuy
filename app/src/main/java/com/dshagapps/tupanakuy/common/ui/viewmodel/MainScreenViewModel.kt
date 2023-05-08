@@ -34,49 +34,44 @@ class MainScreenViewModel @Inject constructor(
         _state.value = newState
     }
 
-    fun getUserInfo(uid: String) = viewModelScope.launch {
+    fun updateScreenData(uid: String) = viewModelScope.launch {
         updateState(State.Loading)
         withContext(Dispatchers.IO) {
-            getUserInfoUseCase(uid) { result ->
-                when (result) {
-                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> { getClassrooms(result.data) }
+            getUserInfoUseCase(uid) { userResult ->
+                when (userResult) {
+                    is OperationResult.Failure -> updateState(State.OnError(userResult.exception))
+                    is OperationResult.Success -> {
+                        getClassroomsUseCase { classroomResult ->
+                            when (classroomResult) {
+                                is OperationResult.Failure -> updateState(State.OnError(classroomResult.exception))
+                                is OperationResult.Success -> updateState(State.Idle(userResult.data, classroomResult.data))
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun updateUserInfo(user: User) = viewModelScope.launch {
+    fun updateUserInfo(prevState: State.Idle) = viewModelScope.launch {
         updateState(State.Loading)
         withContext(Dispatchers.IO) {
-            setUserInfoUseCase(user) { result ->
+            setUserInfoUseCase(prevState.user) { result ->
                 when (result) {
                     is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> updateState(State.Idle(result.data))
+                    is OperationResult.Success -> updateScreenData(prevState.user.uid)
                 }
             }
         }
     }
 
-    fun createClassroom(classroom: Classroom, user: User) = viewModelScope.launch {
+    fun createClassroom(prevState: State.Idle) = viewModelScope.launch {
         updateState(State.Loading)
         withContext(Dispatchers.IO) {
-            setClassroomUseCase(classroom) { result ->
+            setClassroomUseCase(Classroom()) { result ->
                 when (result) {
                     is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> updateState(State.Idle(user))
-                }
-            }
-        }
-    }
-
-    fun getClassrooms(user: User) = viewModelScope.launch {
-        updateState(State.Loading)
-        withContext(Dispatchers.IO) {
-            getClassroomsUseCase { result ->
-                when (result) {
-                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> updateState(State.Idle(user, result.data))
+                    is OperationResult.Success -> updateScreenData(prevState.user.uid)
                 }
             }
         }
@@ -92,10 +87,12 @@ class MainScreenViewModel @Inject constructor(
     sealed class State {
         object Loading: State()
         data class Idle(
-            val user: User,
+            val user: User = User(),
             val classrooms: List<Classroom> = listOf()
         ): State()
         object OnSignOut: State()
+        data class OnToggleUserType(val prevState: Idle): State()
+        data class OnCreateClassroom(val prevState: Idle): State()
         data class OnError(val exception: Exception): State()
     }
 }

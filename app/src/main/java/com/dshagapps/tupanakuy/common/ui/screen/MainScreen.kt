@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,8 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import com.dshagapps.tupanakuy.R
-import com.dshagapps.tupanakuy.common.domain.model.Classroom
-import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.domain.model.enum.UserType
 import com.dshagapps.tupanakuy.common.ui.component.button.StateButton
 import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
@@ -33,8 +30,8 @@ fun MainScreen(
     updateState: (MainScreenViewModel.State) -> Unit = {},
     onInitScreen: () -> Unit = {},
     onSignOutButtonClick: () -> Unit = {},
-    onToggleUserTypeButtonClick: (User) -> Unit = {},
-    onCreateClassroomButtonClick: (Classroom, User) -> Unit = { _, _ -> },
+    onToggleUserTypeButtonClick: (MainScreenViewModel.State.Idle) -> Unit = {},
+    onCreateClassroomButtonClick: (MainScreenViewModel.State.Idle) -> Unit = {},
     goToAuthScreen: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
@@ -67,19 +64,13 @@ fun MainScreen(
                     StateButton(
                         ButtonState(
                             label = "Toggle user type",
-                            onClick = {
-                                onToggleUserTypeButtonClick(
-                                    s.user.copy(userType = if (s.user.userType == UserType.STUDENT) UserType.TEACHER else UserType.STUDENT)
-                                )
-                            }
+                            onClick = { updateState(MainScreenViewModel.State.OnToggleUserType(s)) },
                         )
                     )
                     StateButton(
                         ButtonState(
                             label = "Create classroom",
-                            onClick = {
-                                onCreateClassroomButtonClick(Classroom(teacherUID = s.user.uid), s.user)
-                            },
+                            onClick = { updateState(MainScreenViewModel.State.OnCreateClassroom(s)) },
                             enabled = s.user.userType == UserType.TEACHER
                         )
                     )
@@ -102,6 +93,12 @@ fun MainScreen(
             LaunchedEffect(Unit) {
                 goToAuthScreen()
             }
+        }
+        is MainScreenViewModel.State.OnCreateClassroom -> {
+            onCreateClassroomButtonClick(s.prevState)
+        }
+        is MainScreenViewModel.State.OnToggleUserType -> {
+            onToggleUserTypeButtonClick(s.prevState)
         }
     }
 }

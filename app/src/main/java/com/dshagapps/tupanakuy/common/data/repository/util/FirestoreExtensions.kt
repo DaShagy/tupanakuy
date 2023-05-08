@@ -60,7 +60,7 @@ object FirestoreExtensions {
                 Tasks.forResult(doc.toObject(T::class.java))
             }.continueWithTask { task ->
                 if (task.result == null) {
-                    this.set(entity).onSuccessTask {
+                    this.set(entity.copyWithUid(this.id)).onSuccessTask {
                         Tasks.forResult(entity)
                     }
                 } else {
