@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,14 +26,15 @@ import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     state: StateFlow<MainScreenViewModel.State>,
     updateState: (MainScreenViewModel.State) -> Unit = {},
     onInitScreen: () -> Unit = {},
     onSignOutButtonClick: () -> Unit = {},
-    onToggleUserTypeButtonClick: (MainScreenViewModel.State.Idle) -> Unit = {},
     onCreateClassroomButtonClick: (MainScreenViewModel.State.Idle) -> Unit = {},
+    onClassroomSignUpButtonClick: (String, MainScreenViewModel.State.Idle) -> Unit = { _, _ -> },
     goToAuthScreen: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
@@ -63,12 +66,6 @@ fun MainScreen(
                     Text("You are a: ${s.user.userType}")
                     StateButton(
                         ButtonState(
-                            label = "Toggle user type",
-                            onClick = { updateState(MainScreenViewModel.State.OnToggleUserType(s)) },
-                        )
-                    )
-                    StateButton(
-                        ButtonState(
                             label = "Create classroom",
                             onClick = { updateState(MainScreenViewModel.State.OnCreateClassroom(s)) },
                             enabled = s.user.userType == UserType.TEACHER
@@ -76,7 +73,22 @@ fun MainScreen(
                     )
                     LazyColumn{
                         items(s.classrooms){
-                            Text(it.uid)
+                            Card(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(it.uid)
+                                StateButton(
+                                    ButtonState(
+                                        label = "Sign up to Classroom",
+                                        onClick = {
+                                            updateState(
+                                                MainScreenViewModel.State.OnClassroomSignUp(it.uid, s)
+                                            )
+                                        },
+                                        enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -88,17 +100,17 @@ fun MainScreen(
                 goToAuthScreen()
             }
         }
+        is MainScreenViewModel.State.OnCreateClassroom -> {
+            onCreateClassroomButtonClick(s.prevState)
+        }
+        is MainScreenViewModel.State.OnClassroomSignUp -> {
+            onClassroomSignUpButtonClick(s.classroomUid, s.prevState)
+        }
         is MainScreenViewModel.State.OnError -> {
             Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
             LaunchedEffect(Unit) {
                 goToAuthScreen()
             }
-        }
-        is MainScreenViewModel.State.OnCreateClassroom -> {
-            onCreateClassroomButtonClick(s.prevState)
-        }
-        is MainScreenViewModel.State.OnToggleUserType -> {
-            onToggleUserTypeButtonClick(s.prevState)
         }
     }
 }

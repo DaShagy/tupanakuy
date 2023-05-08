@@ -46,5 +46,8 @@ object UseCaseModule {
 
     @Provides
     fun providesGetClassroomsUseCase(repository: DataRepository) = GetClassroomsUseCase(repository)
+
+    @Provides
+    fun providesAddStudentToClassroomUseCase(repository: DataRepository) = AddStudentToClassroomUseCase(repository)
     //endregion
 }

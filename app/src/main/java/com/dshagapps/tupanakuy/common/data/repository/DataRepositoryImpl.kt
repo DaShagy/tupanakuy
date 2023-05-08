@@ -8,6 +8,7 @@ import com.dshagapps.tupanakuy.common.domain.model.Classroom
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
 import com.dshagapps.tupanakuy.common.util.OperationResult
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataRepository {
@@ -32,5 +33,29 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
 
     override fun getClassrooms(listener: (OperationResult<List<Classroom>>) -> Unit) {
         firestore.collection("classrooms").getDomainEntities(listener)
+    }
+
+    override fun addStudentToClassroom(
+        classroomUid: String,
+        studentUid: String,
+        listener: (OperationResult<Classroom>) -> Unit
+    ) {
+        val docRef = firestore.collection("classrooms").document(classroomUid)
+        docRef.get().onSuccessTask { doc ->
+            Tasks.forResult(doc.toObject(Classroom::class.java))
+        }.continueWithTask { task ->
+            task.result?.let { classroom ->
+                val newStudentList = classroom.studentUIDs.toMutableList()
+                if (!newStudentList.contains(studentUid))
+                    newStudentList.add(studentUid)
+                val newClassroom = classroom.copy(studentUIDs = newStudentList)
+                docRef.setDomainEntity(newClassroom, listener)
+            }
+        }.addOnSuccessListener {
+            it?.let { data -> listener(OperationResult.Success(data)) }
+                ?: listener(OperationResult.Failure(Exception("Something went wrong")))
+        }.addOnFailureListener {
+            listener(OperationResult.Failure(it))
+        }
     }
 }
