@@ -1,5 +1,6 @@
 package com.dshagapps.tupanakuy.common.data.repository
 
+import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.getDomainEntities
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.getDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntityIfNotExists
@@ -27,5 +28,9 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
         listener: (OperationResult<Classroom>) -> Unit
     ) {
         firestore.collection("classrooms").document().setDomainEntity(classroom, listener)
+    }
+
+    override fun getClassrooms(listener: (OperationResult<List<Classroom>>) -> Unit) {
+        firestore.collection("classrooms").getDomainEntities(listener)
     }
 }

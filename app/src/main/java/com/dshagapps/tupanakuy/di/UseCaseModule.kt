@@ -6,10 +6,7 @@ import com.dshagapps.tupanakuy.auth.domain.use_case.SignInUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignUpUseCase
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
-import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoIfNotExistsUseCase
-import com.dshagapps.tupanakuy.common.domain.use_case.GetUserInfoUseCase
-import com.dshagapps.tupanakuy.common.domain.use_case.SetClassroomUseCase
-import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,5 +43,8 @@ object UseCaseModule {
     //region classroom_data_use_cases
     @Provides
     fun providesSetClassroomUseCase(repository: DataRepository) = SetClassroomUseCase(repository)
+
+    @Provides
+    fun providesGetClassroomsUseCase(repository: DataRepository) = GetClassroomsUseCase(repository)
     //endregion
 }

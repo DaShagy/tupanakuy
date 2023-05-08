@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
 import com.dshagapps.tupanakuy.common.domain.model.User
+import com.dshagapps.tupanakuy.common.domain.use_case.GetClassroomsUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.GetUserInfoUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.SetClassroomUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoUseCase
@@ -22,7 +23,8 @@ class MainScreenViewModel @Inject constructor(
     private val signOutUseCase: SignOutUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val setUserInfoUseCase: SetUserInfoUseCase,
-    private val setClassroomUseCase: SetClassroomUseCase
+    private val setClassroomUseCase: SetClassroomUseCase,
+    private val getClassroomsUseCase: GetClassroomsUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -38,7 +40,7 @@ class MainScreenViewModel @Inject constructor(
             getUserInfoUseCase(uid) { result ->
                 when (result) {
                     is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> updateState(State.Idle(result.data))
+                    is OperationResult.Success -> { getClassrooms(result.data) }
                 }
             }
         }
@@ -68,6 +70,18 @@ class MainScreenViewModel @Inject constructor(
         }
     }
 
+    fun getClassrooms(user: User) = viewModelScope.launch {
+        updateState(State.Loading)
+        withContext(Dispatchers.IO) {
+            getClassroomsUseCase { result ->
+                when (result) {
+                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
+                    is OperationResult.Success -> updateState(State.Idle(user, result.data))
+                }
+            }
+        }
+    }
+
     fun signOut() = viewModelScope.launch {
         updateState(State.Loading)
         when (withContext(Dispatchers.IO) { signOutUseCase() }){
@@ -77,7 +91,10 @@ class MainScreenViewModel @Inject constructor(
 
     sealed class State {
         object Loading: State()
-        data class Idle(val user: User): State()
+        data class Idle(
+            val user: User,
+            val classrooms: List<Classroom> = listOf()
+        ): State()
         object OnSignOut: State()
         data class OnError(val exception: Exception): State()
     }
