@@ -14,8 +14,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import com.dshagapps.tupanakuy.R
+import com.dshagapps.tupanakuy.common.domain.model.Classroom
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.domain.model.enum.UserType
+import com.dshagapps.tupanakuy.common.ui.component.button.StateButton
 import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
 import com.dshagapps.tupanakuy.common.ui.util.ButtonState
@@ -29,7 +31,8 @@ fun MainScreen(
     updateState: (MainScreenViewModel.State) -> Unit = {},
     onInitScreen: () -> Unit = {},
     onSignOutButtonClick: () -> Unit = {},
-    onToggleUserTypeButtonClick: (User) -> Unit,
+    onToggleUserTypeButtonClick: (User) -> Unit = {},
+    onCreateClassroomButtonClick: (Classroom, User) -> Unit = { _, _ -> },
     goToAuthScreen: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
@@ -59,15 +62,25 @@ fun MainScreen(
                     Text("UID: ${s.user.uid}")
                     Text("Email: ${s.user.email}")
                     Text("You are a: ${s.user.userType}")
-                    Button(
-                        onClick = {
-                            onToggleUserTypeButtonClick(
-                                s.user.copy(userType = if (s.user.userType == UserType.STUDENT) UserType.TEACHER else UserType.STUDENT)
-                            )
-                        }
-                    ) {
-                        Text("Toggle user type")
-                    }
+                    StateButton(
+                        ButtonState(
+                            label = "Toggle user type",
+                            onClick = {
+                                onToggleUserTypeButtonClick(
+                                    s.user.copy(userType = if (s.user.userType == UserType.STUDENT) UserType.TEACHER else UserType.STUDENT)
+                                )
+                            }
+                        )
+                    )
+                    StateButton(
+                        ButtonState(
+                            label = "Create classroom",
+                            onClick = {
+                                onCreateClassroomButtonClick(Classroom(s.user.uid), s.user)
+                            },
+                            enabled = s.user.userType == UserType.TEACHER
+                        )
+                    )
                 }
             }
         }
