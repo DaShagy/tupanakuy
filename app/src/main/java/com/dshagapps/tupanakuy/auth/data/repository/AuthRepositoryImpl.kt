@@ -5,7 +5,6 @@ import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.auth.domain.repository.AuthRepository
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthRepositoryImpl(private val auth: FirebaseAuth): AuthRepository {
     override fun checkAuthState(): OperationResult<User> {

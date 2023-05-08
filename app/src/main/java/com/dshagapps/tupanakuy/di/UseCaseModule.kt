@@ -6,7 +6,7 @@ import com.dshagapps.tupanakuy.auth.domain.use_case.SignInUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignOutUseCase
 import com.dshagapps.tupanakuy.auth.domain.use_case.SignUpUseCase
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
-import com.dshagapps.tupanakuy.common.domain.use_case.CheckUserInfoUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoIfNotExistsUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.GetUserInfoUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.SetUserInfoUseCase
 import dagger.Module
@@ -39,6 +39,6 @@ object UseCaseModule {
     fun providesSetUserInfoUseCase(repository: DataRepository) = SetUserInfoUseCase(repository)
 
     @Provides
-    fun providesCheckUserInfoUseCase(repository: DataRepository) = CheckUserInfoUseCase(repository)
+    fun providesSetUserInfoIfNotExistsUseCase(repository: DataRepository) = SetUserInfoIfNotExistsUseCase(repository)
     //endregion
 }

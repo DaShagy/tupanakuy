@@ -6,12 +6,12 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentReference
 
 object FirebaseExtensions {
-    inline fun <reified T> DocumentReference.getDomainEntity(crossinline listener: (OperationResult<T>) -> Unit): Task<T?> {
+    inline fun <reified T: Any> DocumentReference.getDomainEntity(crossinline listener: (OperationResult<T>) -> Unit): Task<T?> {
         return this.get()
             .onSuccessTask { doc ->
                 Tasks.forResult(doc.toObject(T::class.java))
-            }.addOnSuccessListener { user ->
-                user?.let {
+            }.addOnSuccessListener { entity ->
+                entity?.let {
                     listener(OperationResult.Success(it))
                 } ?: listener(OperationResult.Failure(Exception("Couldn't retrieve ${T::class.java.simpleName} from firestore")))
             }.addOnFailureListener { exception ->
@@ -30,17 +30,27 @@ object FirebaseExtensions {
             }
     }
 
-    inline fun <reified T> DocumentReference.checkIfDomainEntityExists(crossinline onCompleteListener: (OperationResult<Unit>) -> Unit) {
-        this.get().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                if (task.result.exists()) {
-                    onCompleteListener(OperationResult.Success(Unit))
+    inline fun <reified T : Any> DocumentReference.setDomainEntityIfNotExists(
+        entity: T,
+        crossinline listener: (OperationResult<T>) -> Unit
+    ): Task<T> {
+        return this.get()
+            .onSuccessTask { doc ->
+                Tasks.forResult(doc.toObject(T::class.java))
+            }.continueWith { task ->
+                if (task.result == null) {
+                    this.set(entity).onSuccessTask {
+                        Tasks.forResult(entity)
+                    }
                 } else {
-                    onCompleteListener(OperationResult.Failure(Exception("Document does not exist")))
+                    Tasks.forResult(task.result)
                 }
-            } else {
-                onCompleteListener(OperationResult.Failure(task.exception ?: Exception("Unknown error")))
+            }.onSuccessTask {
+                Tasks.forResult(entity)
+            }.addOnSuccessListener {
+                listener(OperationResult.Success(entity))
+            }.addOnFailureListener { exception ->
+                listener(OperationResult.Failure(exception))
             }
-        }
     }
 }
