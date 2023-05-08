@@ -5,7 +5,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentReference
 
-object FirebaseExtensions {
+object FirestoreExtensions {
     inline fun <reified T: Any> DocumentReference.getDomainEntity(crossinline listener: (OperationResult<T>) -> Unit): Task<T?> {
         return this.get()
             .onSuccessTask { doc ->

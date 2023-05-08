@@ -63,6 +63,7 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             updateState = { newState -> viewModel.updateState(newState) },
             onInitScreen = { viewModel.getUserInfo(uid) },
             onSignOutButtonClick = { viewModel.signOut() },
+            onToggleUserTypeButtonClick = { user -> viewModel.updateUserInfo(user) },
             goToAuthScreen = {
                 navController.popBackStack()
                 navController.navigate(AppScreen.Auth.route)

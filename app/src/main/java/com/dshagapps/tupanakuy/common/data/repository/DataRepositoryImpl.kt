@@ -1,8 +1,8 @@
 package com.dshagapps.tupanakuy.common.data.repository
 
-import com.dshagapps.tupanakuy.common.data.repository.util.FirebaseExtensions.getDomainEntity
-import com.dshagapps.tupanakuy.common.data.repository.util.FirebaseExtensions.setDomainEntity
-import com.dshagapps.tupanakuy.common.data.repository.util.FirebaseExtensions.setDomainEntityIfNotExists
+import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.getDomainEntity
+import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntity
+import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntityIfNotExists
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
 import com.dshagapps.tupanakuy.common.util.OperationResult
