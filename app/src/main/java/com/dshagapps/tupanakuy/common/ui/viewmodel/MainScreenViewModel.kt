@@ -19,10 +19,10 @@ import javax.inject.Inject
 class MainScreenViewModel @Inject constructor(
     private val signOutUseCase: SignOutUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
-    private val setUserInfoUseCase: SetUserInfoUseCase,
     private val setClassroomUseCase: SetClassroomUseCase,
     private val getClassroomsUseCase: GetClassroomsUseCase,
-    private val addStudentToClassroomUseCase: AddStudentToClassroomUseCase
+    private val addStudentToClassroomUseCase: AddStudentToClassroomUseCase,
+    private val removeStudentFromClassroomUseCase: RemoveStudentFromClassroomUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -37,27 +37,22 @@ class MainScreenViewModel @Inject constructor(
         withContext(Dispatchers.IO) {
             getUserInfoUseCase(uid) { userResult ->
                 when (userResult) {
-                    is OperationResult.Failure -> updateState(State.OnError(userResult.exception))
+                    is OperationResult.Failure -> updateState(State.OnAuthError(userResult.exception))
                     is OperationResult.Success -> {
                         getClassroomsUseCase { classroomResult ->
                             when (classroomResult) {
-                                is OperationResult.Failure -> updateState(State.OnError(classroomResult.exception))
+                                is OperationResult.Failure -> {
+                                    updateState(
+                                        State.OnError(
+                                            classroomResult.exception,
+                                            State.Idle(userResult.data)
+                                        )
+                                    )
+                                }
                                 is OperationResult.Success -> updateState(State.Idle(userResult.data, classroomResult.data))
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    fun updateUserInfo(prevState: State.Idle) = viewModelScope.launch {
-        updateState(State.Loading)
-        withContext(Dispatchers.IO) {
-            setUserInfoUseCase(prevState.user) { result ->
-                when (result) {
-                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> updateScreenData(prevState.user.uid)
                 }
             }
         }
@@ -68,7 +63,7 @@ class MainScreenViewModel @Inject constructor(
         withContext(Dispatchers.IO) {
             setClassroomUseCase(Classroom()) { result ->
                 when (result) {
-                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
+                    is OperationResult.Failure -> updateState(State.OnError(result.exception, prevState))
                     is OperationResult.Success -> updateScreenData(prevState.user.uid)
                 }
             }
@@ -87,7 +82,19 @@ class MainScreenViewModel @Inject constructor(
         withContext(Dispatchers.IO) {
             addStudentToClassroomUseCase(classroomUid, prevState.user.uid) { result ->
                 when (result) {
-                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
+                    is OperationResult.Failure -> updateState(State.OnError(result.exception, prevState))
+                    is OperationResult.Success -> updateScreenData(prevState.user.uid)
+                }
+            }
+        }
+    }
+
+    fun classroomSignOut(classroomUid: String, prevState: State.Idle) = viewModelScope.launch {
+        updateState(State.Loading)
+        withContext(Dispatchers.IO) {
+            removeStudentFromClassroomUseCase(classroomUid, prevState.user.uid) { result ->
+                when (result) {
+                    is OperationResult.Failure -> updateState(State.OnError(result.exception, prevState))
                     is OperationResult.Success -> updateScreenData(prevState.user.uid)
                 }
             }
@@ -103,6 +110,8 @@ class MainScreenViewModel @Inject constructor(
         object OnSignOut: State()
         data class OnCreateClassroom(val prevState: Idle): State()
         data class OnClassroomSignUp(val classroomUid: String, val prevState: Idle) : State()
-        data class OnError(val exception: Exception): State()
+        data class OnClassroomSignOut(val classroomUid: String, val prevState: Idle) : State()
+        data class OnAuthError(val exception: Exception): State()
+        data class OnError(val exception: Exception, val prevState: Idle): State()
     }
 }

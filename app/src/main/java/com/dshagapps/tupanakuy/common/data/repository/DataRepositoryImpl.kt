@@ -46,14 +46,42 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
         }.continueWithTask { task ->
             task.result?.let { classroom ->
                 val newStudentList = classroom.studentUIDs.toMutableList()
-                if (!newStudentList.contains(studentUid))
+                if (!newStudentList.contains(studentUid)) {
                     newStudentList.add(studentUid)
-                val newClassroom = classroom.copy(studentUIDs = newStudentList)
-                docRef.setDomainEntity(newClassroom, listener)
+                    val newClassroom = classroom.copy(studentUIDs = newStudentList)
+                    docRef.setDomainEntity(newClassroom, listener)
+                } else {
+                    Tasks.forException(Exception("Student is already subscribed to classroom"))
+                }
             }
         }.addOnSuccessListener {
-            it?.let { data -> listener(OperationResult.Success(data)) }
-                ?: listener(OperationResult.Failure(Exception("Something went wrong")))
+            listener(OperationResult.Success(it))
+        }.addOnFailureListener {
+            listener(OperationResult.Failure(it))
+        }
+    }
+
+    override fun removeStudentFromClassroom(
+        classroomUid: String,
+        studentUid: String,
+        listener: (OperationResult<Classroom>) -> Unit
+    ) {
+        val docRef = firestore.collection("classrooms").document(classroomUid)
+        docRef.get().onSuccessTask { doc ->
+            Tasks.forResult(doc.toObject(Classroom::class.java))
+        }.continueWithTask { task ->
+            task.result?.let { classroom ->
+                val newStudentList = classroom.studentUIDs.toMutableList()
+                if (newStudentList.contains(studentUid)) {
+                    newStudentList.remove(studentUid)
+                    val newClassroom = classroom.copy(studentUIDs = newStudentList)
+                    docRef.setDomainEntity(newClassroom, listener)
+                } else {
+                    Tasks.forException(Exception("Student is not subscribed to classroom"))
+                }
+            }
+        }.addOnSuccessListener {
+            listener(OperationResult.Success(it))
         }.addOnFailureListener {
             listener(OperationResult.Failure(it))
         }

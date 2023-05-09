@@ -15,4 +15,9 @@ interface DataRepository {
         studentUid: String,
         listener: (OperationResult<Classroom>) -> Unit
     )
+    fun removeStudentFromClassroom(
+        classroomUid: String,
+        studentUid: String,
+        listener: (OperationResult<Classroom>) -> Unit
+    )
 }

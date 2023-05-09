@@ -2,7 +2,9 @@ package com.dshagapps.tupanakuy.common.ui.screen
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,6 +37,7 @@ fun MainScreen(
     onSignOutButtonClick: () -> Unit = {},
     onCreateClassroomButtonClick: (MainScreenViewModel.State.Idle) -> Unit = {},
     onClassroomSignUpButtonClick: (String, MainScreenViewModel.State.Idle) -> Unit = { _, _ -> },
+    onClassroomSignOutButtonClick: (String, MainScreenViewModel.State.Idle) -> Unit = { _, _ -> },
     goToAuthScreen: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
@@ -64,30 +67,66 @@ fun MainScreen(
                     Text("UID: ${s.user.uid}")
                     Text("Email: ${s.user.email}")
                     Text("You are a: ${s.user.userType}")
-                    StateButton(
-                        ButtonState(
-                            label = "Create classroom",
-                            onClick = { updateState(MainScreenViewModel.State.OnCreateClassroom(s)) },
-                            enabled = s.user.userType == UserType.TEACHER
+                    if (s.user.userType == UserType.TEACHER) {
+                        StateButton(
+                            ButtonState(
+                                label = "Create classroom",
+                                onClick = {
+                                    updateState(MainScreenViewModel.State.OnCreateClassroom(s))
+                                }
+                            )
                         )
-                    )
+                    }
                     LazyColumn{
                         items(s.classrooms){
                             Card(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(it.uid)
-                                StateButton(
-                                    ButtonState(
-                                        label = "Sign up to Classroom",
-                                        onClick = {
-                                            updateState(
-                                                MainScreenViewModel.State.OnClassroomSignUp(it.uid, s)
-                                            )
-                                        },
-                                        enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    StateButton(
+                                        ButtonState(
+                                            label = "Sign up to Classroom",
+                                            onClick = {
+                                                updateState(
+                                                    MainScreenViewModel.State.OnClassroomSignUp(it.uid, s)
+                                                )
+                                            },
+                                            enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                        )
                                     )
-                                )
+                                    if (it.studentUIDs.contains(s.user.uid)) {
+                                        StateButton(
+                                            ButtonState(
+                                                label = "Unregister",
+                                                onClick = {
+                                                    updateState(
+                                                        MainScreenViewModel.State.OnClassroomSignOut(it.uid, s)
+                                                    )
+                                                },
+                                                enabled = (s.user.userType == UserType.STUDENT && it.studentUIDs.contains(s.user.uid))
+                                            )
+                                        )
+                                    }
+                                }
+                                if (it.studentUIDs.contains(s.user.uid)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        StateButton(
+                                            ButtonState(
+                                                label = "Go to classroom screen",
+                                                onClick = {
+                                                    
+                                                },
+                                                enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -106,11 +145,18 @@ fun MainScreen(
         is MainScreenViewModel.State.OnClassroomSignUp -> {
             onClassroomSignUpButtonClick(s.classroomUid, s.prevState)
         }
-        is MainScreenViewModel.State.OnError -> {
+        is MainScreenViewModel.State.OnClassroomSignOut -> {
+            onClassroomSignOutButtonClick(s.classroomUid, s.prevState)
+        }
+        is MainScreenViewModel.State.OnAuthError -> {
             Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
             LaunchedEffect(Unit) {
                 goToAuthScreen()
             }
+        }
+        is MainScreenViewModel.State.OnError -> {
+            Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
+            updateState(MainScreenViewModel.State.Idle())
         }
     }
 }
