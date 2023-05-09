@@ -14,7 +14,7 @@ fun StateTextField(
     TextField(
         modifier = modifier,
         value = state.value,
-        onValueChange = state.onValueChange,
+        onValueChange = state.updateValue,
         label = { Text(state.label) }
     )
 }

@@ -98,6 +98,9 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
             onInitScreen = { viewModel.getClassroomByIdUseCase(uid) },
+            onSendButtonClick = { message, userUid, prevState ->
+                viewModel.sendMessageToChat(message, userUid, prevState)
+            },
             goToPreviousScreen = { navController.popBackStack() }
         )
     }

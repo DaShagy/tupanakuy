@@ -6,10 +6,12 @@ import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.s
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntityIfNotExists
 import com.dshagapps.tupanakuy.common.domain.model.Chat
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
+import com.dshagapps.tupanakuy.common.domain.model.Message
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataRepository {
@@ -107,6 +109,29 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
             listener(OperationResult.Success(it))
         }.addOnFailureListener {
             listener(OperationResult.Failure(it))
+        }
+    }
+
+    override fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Chat>) -> Unit) {
+        val docRef = firestore.collection("chats").document(chatUid)
+        docRef.get().onSuccessTask { doc ->
+            Tasks.forResult(doc.toObject(Chat::class.java))
+        }.continueWithTask { task ->
+            task.result?.let { chat ->
+                val messageDocRef = firestore.collection("messages").document()
+                val newMessage = message.copyWithTimestamp(Timestamp.now()).copyWithUid(messageDocRef.id)
+                messageDocRef.setDomainEntity(newMessage) {
+                    when (it) {
+                        is OperationResult.Failure -> listener(OperationResult.Failure(it.exception))
+                        is OperationResult.Success -> {
+                            val newMessageList = chat.messages.toMutableList()
+                            newMessageList.add(newMessage as Message)
+                            val newChat = chat.copy(messages = newMessageList)
+                            docRef.setDomainEntity(newChat, listener)
+                        }
+                    }
+                }
+            }
         }
     }
 }

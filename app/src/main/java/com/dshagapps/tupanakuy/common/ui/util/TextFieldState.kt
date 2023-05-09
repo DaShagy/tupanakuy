@@ -15,7 +15,7 @@ data class TextFieldState(
     val value get() = state.value
     val isError: Boolean get() = errorState.value
 
-    val onValueChange: (String) -> Unit = { newValue ->
+    val updateValue: (String) -> Unit = { newValue ->
         state.value = newValue
         errorState.value = _validator(newValue)
         _onValueChangedCallback(newValue)

@@ -5,11 +5,14 @@ import com.google.firebase.firestore.ServerTimestamp
 
 data class Message(
     override val uid: String = "",
-    val author: String = "",
+    val authorUID: String = "",
     val content: String = "",
     @ServerTimestamp val timestamp: Timestamp? = null
 ): Entity() {
     override fun copyWithUid(uid: String): Entity {
         return this.copy(uid = uid)
+    }
+    fun copyWithTimestamp(timestamp: Timestamp): Message {
+        return this.copy(timestamp = timestamp)
     }
 }

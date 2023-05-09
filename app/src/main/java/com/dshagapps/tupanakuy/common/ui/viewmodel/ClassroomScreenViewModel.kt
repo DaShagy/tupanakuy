@@ -3,7 +3,9 @@ package com.dshagapps.tupanakuy.common.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
+import com.dshagapps.tupanakuy.common.domain.model.Message
 import com.dshagapps.tupanakuy.common.domain.use_case.GetClassroomByIdUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.SendMessageToChatUseCase
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ClassroomScreenViewModel @Inject constructor(
-    private val getClassroomByIdUseCase: GetClassroomByIdUseCase
+    private val getClassroomByIdUseCase: GetClassroomByIdUseCase,
+    private val sendMessageToChatUseCase: SendMessageToChatUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -33,6 +36,15 @@ class ClassroomScreenViewModel @Inject constructor(
                     is OperationResult.Failure -> updateState(State.OnError(result.exception))
                     is OperationResult.Success -> updateState(State.Idle(result.data))
                 }
+            }
+        }
+    }
+
+    fun sendMessageToChat(message: String, userUid: String, prevState: State.Idle) = viewModelScope.launch(Dispatchers.IO) {
+        sendMessageToChatUseCase(Message(authorUID = userUid, content = message), prevState.classroom.chatUID) { result ->
+            when (result) {
+                is OperationResult.Failure -> updateState(State.OnError(result.exception))
+                is OperationResult.Success -> updateState(prevState)
             }
         }
     }

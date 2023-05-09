@@ -1,10 +1,13 @@
 package com.dshagapps.tupanakuy.common.ui.component.screen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
@@ -16,11 +19,16 @@ import com.dshagapps.tupanakuy.common.ui.component.screen.ChatScreenId.MESSAGE_I
 import com.dshagapps.tupanakuy.common.ui.util.ButtonState
 import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
+    onSendButtonClick: (String) -> Unit = {},
     content: @Composable RowScope.() -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val hideKeyboard: () -> Unit = { keyboardController?.hide() }
+
     ConstraintLayout(
         modifier = modifier.fillMaxSize(),
         constraintSet = getChatScreenConstraintSet()
@@ -41,12 +49,22 @@ fun ChatScreen(
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val textFieldState = TextFieldState()
             StateTextField(
-                modifier = Modifier.weight(1f).padding(4.dp),
-                state = TextFieldState()
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp),
+                state = textFieldState
             )
             StateButton(
-                ButtonState("Send")
+                ButtonState(
+                    label = "Send",
+                    onClick = {
+                        hideKeyboard()
+                        onSendButtonClick(textFieldState.value)
+                        textFieldState.updateValue("")
+                    }
+                )
             )
         }
     }

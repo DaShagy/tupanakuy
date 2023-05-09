@@ -18,6 +18,7 @@ fun ClassroomScreen(
     state: StateFlow<ClassroomScreenViewModel.State>,
     updateState: (ClassroomScreenViewModel.State) -> Unit = {},
     onInitScreen: () -> Unit = {},
+    onSendButtonClick: (String, String, ClassroomScreenViewModel.State.Idle) -> Unit = { _, _, _ -> },
     goToPreviousScreen: () -> Unit = {}
 ) {
     val context: Context = LocalContext.current
@@ -33,7 +34,11 @@ fun ClassroomScreen(
     when (val s = state.collectAsState().value) {
         is ClassroomScreenViewModel.State.Idle -> {
             BaseScreen(title = "Classroom: ${s.classroom.uid}, Chat: ${s.classroom.chatUID}") {
-                ChatScreen {}
+                ChatScreen(
+                    onSendButtonClick = { message ->
+                        onSendButtonClick(message, s.classroom.teacherUID, s)
+                    }
+                ) {}
             }
         }
         ClassroomScreenViewModel.State.Loading -> Loader()

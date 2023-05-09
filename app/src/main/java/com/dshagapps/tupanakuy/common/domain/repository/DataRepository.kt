@@ -1,6 +1,8 @@
 package com.dshagapps.tupanakuy.common.domain.repository
 
+import com.dshagapps.tupanakuy.common.domain.model.Chat
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
+import com.dshagapps.tupanakuy.common.domain.model.Message
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.util.OperationResult
 
@@ -21,4 +23,5 @@ interface DataRepository {
         studentUid: String,
         listener: (OperationResult<Classroom>) -> Unit
     )
+    fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Chat>) -> Unit)
 }
