@@ -113,5 +113,6 @@ class MainScreenViewModel @Inject constructor(
         data class OnClassroomSignOut(val classroomUid: String, val prevState: Idle) : State()
         data class OnAuthError(val exception: Exception): State()
         data class OnError(val exception: Exception, val prevState: Idle): State()
+        data class GoToClassroom(val classroomUid: String) : State()
     }
 }

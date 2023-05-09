@@ -8,9 +8,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.UID_ARGUMENT
 import com.dshagapps.tupanakuy.common.ui.screen.AuthScreen
+import com.dshagapps.tupanakuy.common.ui.screen.ClassroomScreen
 import com.dshagapps.tupanakuy.common.ui.screen.MainScreen
 import com.dshagapps.tupanakuy.common.ui.screen.SplashScreen
 import com.dshagapps.tupanakuy.common.ui.viewmodel.AuthScreenViewModel
+import com.dshagapps.tupanakuy.common.ui.viewmodel.ClassroomScreenViewModel
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
 import com.dshagapps.tupanakuy.common.ui.viewmodel.SplashScreenViewModel
 
@@ -76,7 +78,27 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
                 navController.popBackStack()
                 navController.navigate(AppScreen.Auth.route)
             },
+            goToClassroomScreen = { classroomUid ->
+                navController.navigate(AppScreen.Classroom.createRoute(classroomUid))
+            }
+        )
+    }
+    composable(
+        route = AppScreen.Classroom.route,
+        arguments = listOf(
+            navArgument(UID_ARGUMENT) { type = NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val viewModel: ClassroomScreenViewModel = hiltViewModel()
 
+        val uid = backStackEntry.arguments?.getString(UID_ARGUMENT)
+        requireNotNull(uid)
+
+        ClassroomScreen(
+            state = viewModel.state,
+            updateState = { newState -> viewModel.updateState(newState) },
+            onInitScreen = { viewModel.updateScreenData(uid) },
+            goToPreviousScreen = { navController.popBackStack() }
         )
     }
 }

@@ -38,7 +38,8 @@ fun MainScreen(
     onCreateClassroomButtonClick: (MainScreenViewModel.State.Idle) -> Unit = {},
     onClassroomSignUpButtonClick: (String, MainScreenViewModel.State.Idle) -> Unit = { _, _ -> },
     onClassroomSignOutButtonClick: (String, MainScreenViewModel.State.Idle) -> Unit = { _, _ -> },
-    goToAuthScreen: () -> Unit = {}
+    goToAuthScreen: () -> Unit = {},
+    goToClassroomScreen: (String) -> Unit = {}
 ) {
     val context: Context = LocalContext.current
 
@@ -120,9 +121,11 @@ fun MainScreen(
                                             ButtonState(
                                                 label = "Go to classroom screen",
                                                 onClick = {
-                                                    
+                                                    updateState(
+                                                        MainScreenViewModel.State.GoToClassroom(it.uid)
+                                                    )
                                                 },
-                                                enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                                enabled = (s.user.userType == UserType.STUDENT && it.studentUIDs.contains(s.user.uid))
                                             )
                                         )
                                     }
@@ -157,6 +160,12 @@ fun MainScreen(
         is MainScreenViewModel.State.OnError -> {
             Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
             updateState(MainScreenViewModel.State.Idle())
+        }
+        is MainScreenViewModel.State.GoToClassroom -> {
+            updateState(MainScreenViewModel.State.Loading)
+            LaunchedEffect(Unit) {
+                goToClassroomScreen(s.classroomUid)
+            }
         }
     }
 }
