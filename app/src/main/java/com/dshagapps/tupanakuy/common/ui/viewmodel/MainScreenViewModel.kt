@@ -61,7 +61,7 @@ class MainScreenViewModel @Inject constructor(
     fun createClassroom(prevState: State.Idle) = viewModelScope.launch {
         updateState(State.Loading)
         withContext(Dispatchers.IO) {
-            setClassroomUseCase(Classroom()) { result ->
+            setClassroomUseCase(Classroom(teacherUID = prevState.user.uid)) { result ->
                 when (result) {
                     is OperationResult.Failure -> updateState(State.OnError(result.exception, prevState))
                     is OperationResult.Success -> updateScreenData(prevState.user.uid)

@@ -10,6 +10,7 @@ interface DataRepository {
     fun setUserInfoIfNotExists(user: User, listener: (OperationResult<User>) -> Unit)
     fun setClassroom(classroom: Classroom, listener: (OperationResult<Classroom>) -> Unit)
     fun getClassrooms(listener: (OperationResult<List<Classroom>>) -> Unit)
+    fun getClassroomById(uid: String, listener: (OperationResult<Classroom>) -> Unit)
     fun addStudentToClassroom(
         classroomUid: String,
         studentUid: String,

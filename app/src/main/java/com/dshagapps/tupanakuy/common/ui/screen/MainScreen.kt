@@ -88,17 +88,19 @@ fun MainScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    StateButton(
-                                        ButtonState(
-                                            label = "Sign up to Classroom",
-                                            onClick = {
-                                                updateState(
-                                                    MainScreenViewModel.State.OnClassroomSignUp(it.uid, s)
-                                                )
-                                            },
-                                            enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                    if (s.user.userType != UserType.TEACHER) {
+                                        StateButton(
+                                            ButtonState(
+                                                label = "Sign up to Classroom",
+                                                onClick = {
+                                                    updateState(
+                                                        MainScreenViewModel.State.OnClassroomSignUp(it.uid, s)
+                                                    )
+                                                },
+                                                enabled = (s.user.userType == UserType.STUDENT && !it.studentUIDs.contains(s.user.uid))
+                                            )
                                         )
-                                    )
+                                    }
                                     if (it.studentUIDs.contains(s.user.uid)) {
                                         StateButton(
                                             ButtonState(
@@ -113,7 +115,7 @@ fun MainScreen(
                                         )
                                     }
                                 }
-                                if (it.studentUIDs.contains(s.user.uid)) {
+                                if (it.studentUIDs.contains(s.user.uid) || it.teacherUID == s.user.uid) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
@@ -124,8 +126,7 @@ fun MainScreen(
                                                     updateState(
                                                         MainScreenViewModel.State.GoToClassroom(it.uid)
                                                     )
-                                                },
-                                                enabled = (s.user.userType == UserType.STUDENT && it.studentUIDs.contains(s.user.uid))
+                                                }
                                             )
                                         )
                                     }
@@ -159,7 +160,7 @@ fun MainScreen(
         }
         is MainScreenViewModel.State.OnError -> {
             Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
-            updateState(MainScreenViewModel.State.Idle())
+            updateState(MainScreenViewModel.State.Idle(s.prevState.user, s.prevState.classrooms))
         }
         is MainScreenViewModel.State.GoToClassroom -> {
             updateState(MainScreenViewModel.State.Loading)

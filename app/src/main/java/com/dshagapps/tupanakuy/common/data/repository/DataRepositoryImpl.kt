@@ -4,6 +4,7 @@ import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.g
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.getDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntityIfNotExists
+import com.dshagapps.tupanakuy.common.domain.model.Chat
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
@@ -28,11 +29,33 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
         classroom: Classroom,
         listener: (OperationResult<Classroom>) -> Unit
     ) {
-        firestore.collection("classrooms").document().setDomainEntity(classroom, listener)
+        val classroomDocRef = firestore.collection("classrooms").document()
+
+        if (classroom.chatUID.isNotEmpty()) {
+            classroomDocRef.setDomainEntity(classroom, listener)
+        } else {
+            val chatDocRef =firestore.collection("chats").document()
+            chatDocRef.setDomainEntityIfNotExists(Chat()) {
+                when (it) {
+                    is OperationResult.Failure -> listener(OperationResult.Failure(it.exception))
+                    else -> classroomDocRef.setDomainEntity(
+                        classroom.copy(chatUID = chatDocRef.id),
+                        listener
+                    )
+                }
+            }
+        }
     }
 
     override fun getClassrooms(listener: (OperationResult<List<Classroom>>) -> Unit) {
         firestore.collection("classrooms").getDomainEntities(listener)
+    }
+
+    override fun getClassroomById(
+        uid: String,
+        listener: (OperationResult<Classroom>) -> Unit
+    ) {
+        firestore.collection("classrooms").document(uid).getDomainEntity(listener)
     }
 
     override fun addStudentToClassroom(
