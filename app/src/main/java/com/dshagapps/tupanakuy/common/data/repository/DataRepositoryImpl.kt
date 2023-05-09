@@ -2,6 +2,7 @@ package com.dshagapps.tupanakuy.common.data.repository
 
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.getDomainEntities
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.getDomainEntity
+import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.observeDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntity
 import com.dshagapps.tupanakuy.common.data.repository.util.FirestoreExtensions.setDomainEntityIfNotExists
 import com.dshagapps.tupanakuy.common.domain.model.Chat
@@ -133,5 +134,13 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
                 }
             }
         }
+    }
+
+    override fun getChatById(chatUid: String, listener: (OperationResult<Chat>) -> Unit) {
+        firestore.collection("chats").document(chatUid).getDomainEntity(listener)
+    }
+
+    override fun setChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit) {
+        firestore.collection("chats").document(chatUid).observeDomainEntity(chatListener).remove()
     }
 }

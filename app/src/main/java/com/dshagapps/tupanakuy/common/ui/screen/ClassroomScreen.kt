@@ -2,6 +2,11 @@ package com.dshagapps.tupanakuy.common.ui.screen
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
@@ -13,6 +18,7 @@ import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.ClassroomScreenViewModel
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClassroomScreen(
     state: StateFlow<ClassroomScreenViewModel.State>,
@@ -38,7 +44,15 @@ fun ClassroomScreen(
                     onSendButtonClick = { message ->
                         onSendButtonClick(message, s.classroom.teacherUID, s)
                     }
-                ) {}
+                ) {
+                    LazyColumn {
+                        items(s.chat.messages) { message ->
+                            Card {
+                                Text(message.content)
+                            }
+                        }
+                    }
+                }
             }
         }
         ClassroomScreenViewModel.State.Loading -> Loader()

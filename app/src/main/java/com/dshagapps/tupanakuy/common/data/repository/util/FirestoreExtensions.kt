@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.ListenerRegistration
 
 object FirestoreExtensions {
     inline fun <reified T: Entity> CollectionReference.getDomainEntities(crossinline listener: (OperationResult<List<T>>) -> Unit): Task<List<T>> {
@@ -73,5 +74,20 @@ object FirestoreExtensions {
             }.addOnFailureListener { exception ->
                 listener(OperationResult.Failure(exception))
             }
+    }
+
+    inline fun <reified T : Entity> DocumentReference.observeDomainEntity(crossinline listener: (OperationResult<T>) -> Unit): ListenerRegistration {
+        return this.addSnapshotListener { snapshot, exception ->
+            if (exception != null) {
+                listener(OperationResult.Failure(exception))
+                return@addSnapshotListener
+            }
+
+            val entity = snapshot?.toObject(T::class.java)
+
+            entity?.let {
+                listener(OperationResult.Success(it))
+            } ?: listener(OperationResult.Failure(Exception("Couldn't retrieve ${T::class.java.simpleName} from firestore")))
+        }
     }
 }
