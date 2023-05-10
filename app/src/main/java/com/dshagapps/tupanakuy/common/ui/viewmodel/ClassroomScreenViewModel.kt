@@ -8,6 +8,7 @@ import com.dshagapps.tupanakuy.common.domain.model.Message
 import com.dshagapps.tupanakuy.common.domain.use_case.GetClassroomByIdUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.ObserveChatByIdUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.SendMessageToChatUseCase
+import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,6 @@ import javax.inject.Inject
 class ClassroomScreenViewModel @Inject constructor(
     private val getClassroomByIdUseCase: GetClassroomByIdUseCase,
     private val sendMessageToChatUseCase: SendMessageToChatUseCase,
-    private val getChatByIdUseCase: ObserveChatByIdUseCase,
     private val observeChatByIdUseCase: ObserveChatByIdUseCase
 ): ViewModel() {
 
@@ -35,20 +35,33 @@ class ClassroomScreenViewModel @Inject constructor(
     fun getClassroomByIdUseCase(classroomUid: String) = viewModelScope.launch {
         updateState(State.Loading)
         withContext(Dispatchers.IO) {
-            getClassroomByIdUseCase(classroomUid) { result ->
-                when (result) {
-                    is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                    is OperationResult.Success -> updateState(State.Idle(result.data, Chat()))
+            getClassroomByIdUseCase(classroomUid) { classroomResult ->
+                when (classroomResult) {
+                    is OperationResult.Failure -> updateState(State.OnError(classroomResult.exception))
+                    is OperationResult.Success -> {
+                        observeChatByIdUseCase(classroomResult.data.chatUID) { chatResult ->
+                            when (chatResult) {
+                                is OperationResult.Failure -> updateState(State.OnError(chatResult.exception))
+                                is OperationResult.Success -> updateState(State.Idle(classroomResult.data, chatResult.data))
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun sendMessageToChat(message: String, userUid: String, prevState: State.Idle) = viewModelScope.launch(Dispatchers.IO) {
-        sendMessageToChatUseCase(Message(authorUID = userUid, content = message), prevState.classroom.chatUID) { result ->
+    fun sendMessageToChat(prevState: State.Idle) = viewModelScope.launch(Dispatchers.IO) {
+        sendMessageToChatUseCase(
+            Message(
+                authorUID = prevState.classroom.teacherUID,
+                content = prevState.messageFieldState.value
+            ),
+            prevState.classroom.chatUID
+        ) { result ->
             when (result) {
                 is OperationResult.Failure -> updateState(State.OnError(result.exception))
-                is OperationResult.Success -> updateState(prevState)
+                is OperationResult.Success -> Unit
             }
         }
     }
@@ -57,8 +70,10 @@ class ClassroomScreenViewModel @Inject constructor(
         object Loading: State()
         data class Idle(
             val classroom: Classroom,
-            val chat: Chat
+            val chat: Chat,
+            val messageFieldState: TextFieldState = TextFieldState()
         ): State()
         data class OnError(val exception: Exception): State()
+        data class OnSendMessageButtonClick(val prevState: Idle): State()
     }
 }

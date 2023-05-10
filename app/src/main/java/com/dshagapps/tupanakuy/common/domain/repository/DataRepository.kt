@@ -23,7 +23,6 @@ interface DataRepository {
         studentUid: String,
         listener: (OperationResult<Classroom>) -> Unit
     )
-    fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Chat>) -> Unit)
+    fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Message>) -> Unit)
     fun setChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit)
-    fun getChatById(chatUid: String, listener: (OperationResult<Chat>) -> Unit)
 }

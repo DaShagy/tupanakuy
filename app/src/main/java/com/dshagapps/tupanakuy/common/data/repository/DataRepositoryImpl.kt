@@ -113,22 +113,27 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
         }
     }
 
-    override fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Chat>) -> Unit) {
-        val docRef = firestore.collection("chats").document(chatUid)
-        docRef.get().onSuccessTask { doc ->
+    override fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Message>) -> Unit) {
+        val chatDocRef = firestore.collection("chats").document(chatUid)
+        chatDocRef.get().onSuccessTask { doc ->
             Tasks.forResult(doc.toObject(Chat::class.java))
         }.continueWithTask { task ->
             task.result?.let { chat ->
                 val messageDocRef = firestore.collection("messages").document()
                 val newMessage = message.copyWithTimestamp(Timestamp.now()).copyWithUid(messageDocRef.id)
-                messageDocRef.setDomainEntity(newMessage) {
-                    when (it) {
-                        is OperationResult.Failure -> listener(OperationResult.Failure(it.exception))
+                messageDocRef.setDomainEntity(newMessage) { messageResult ->
+                    when (messageResult) {
+                        is OperationResult.Failure -> listener(OperationResult.Failure(messageResult.exception))
                         is OperationResult.Success -> {
                             val newMessageList = chat.messages.toMutableList()
                             newMessageList.add(newMessage as Message)
                             val newChat = chat.copy(messages = newMessageList)
-                            docRef.setDomainEntity(newChat, listener)
+                            chatDocRef.setDomainEntity(newChat) { chatResult ->
+                                when (chatResult) {
+                                    is OperationResult.Failure -> listener(OperationResult.Failure(chatResult.exception))
+                                    is OperationResult.Success -> listener(OperationResult.Success(newMessage))
+                                }
+                            }
                         }
                     }
                 }
@@ -136,11 +141,7 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
         }
     }
 
-    override fun getChatById(chatUid: String, listener: (OperationResult<Chat>) -> Unit) {
-        firestore.collection("chats").document(chatUid).getDomainEntity(listener)
-    }
-
     override fun setChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit) {
-        firestore.collection("chats").document(chatUid).observeDomainEntity(chatListener).remove()
+        firestore.collection("chats").document(chatUid).observeDomainEntity(chatListener)
     }
 }
