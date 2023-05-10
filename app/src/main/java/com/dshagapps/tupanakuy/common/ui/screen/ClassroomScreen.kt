@@ -2,9 +2,7 @@ package com.dshagapps.tupanakuy.common.ui.screen
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -12,10 +10,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
@@ -68,9 +68,7 @@ fun ClassroomChatScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val hideKeyboard: () -> Unit = { keyboardController?.hide() }
 
-    BaseScreen(
-        title = "Classroom: ${state.classroom.uid}, Chat: ${state.classroom.chatUID}"
-    ) {
+    BaseScreen(title = "Classroom chat") {
         ChatScreen(
             messageFieldState = state.messageFieldState,
             sendMessageButtonState = ButtonState(
@@ -85,8 +83,19 @@ fun ClassroomChatScreen(
         ) {
             LazyColumn {
                 items(state.chat.messages) { message ->
-                    Card {
-                        Text(message.content)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp, 4.dp),
+                        horizontalArrangement = if (message.authorUID == state.currentUserUID) Arrangement.End else Arrangement.Start
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .wrapContentWidth(if (message.authorUID == state.currentUserUID) Alignment.End else Alignment.Start)
+                        ) {
+                            Text(message.content)
+                        }
                     }
                 }
             }

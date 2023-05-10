@@ -32,7 +32,7 @@ class ClassroomScreenViewModel @Inject constructor(
         _state.value = newState
     }
 
-    fun getClassroomByIdUseCase(classroomUid: String) = viewModelScope.launch {
+    fun getClassroomByIdUseCase(currentUserUID: String, classroomUid: String) = viewModelScope.launch {
         updateState(State.Loading)
         withContext(Dispatchers.IO) {
             getClassroomByIdUseCase(classroomUid) { classroomResult ->
@@ -42,7 +42,9 @@ class ClassroomScreenViewModel @Inject constructor(
                         observeChatByIdUseCase(classroomResult.data.chatUID) { chatResult ->
                             when (chatResult) {
                                 is OperationResult.Failure -> updateState(State.OnError(chatResult.exception))
-                                is OperationResult.Success -> updateState(State.Idle(classroomResult.data, chatResult.data))
+                                is OperationResult.Success -> updateState(
+                                        State.Idle(currentUserUID, classroomResult.data, chatResult.data)
+                                    )
                             }
                         }
                     }
@@ -54,7 +56,7 @@ class ClassroomScreenViewModel @Inject constructor(
     fun sendMessageToChat(prevState: State.Idle) = viewModelScope.launch(Dispatchers.IO) {
         sendMessageToChatUseCase(
             Message(
-                authorUID = prevState.classroom.teacherUID,
+                authorUID = prevState.currentUserUID,
                 content = prevState.messageFieldState.value
             ),
             prevState.classroom.chatUID
@@ -69,6 +71,7 @@ class ClassroomScreenViewModel @Inject constructor(
     sealed class State {
         object Loading: State()
         data class Idle(
+            val currentUserUID: String,
             val classroom: Classroom,
             val chat: Chat,
             val messageFieldState: TextFieldState = TextFieldState()

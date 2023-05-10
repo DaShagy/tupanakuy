@@ -6,7 +6,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.dshagapps.tupanakuy.common.navigation.AppRoutes.UID_ARGUMENT
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.CLASSROOM_UID_ARGUMENT
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.USER_UID_ARGUMENT
 import com.dshagapps.tupanakuy.common.ui.screen.AuthScreen
 import com.dshagapps.tupanakuy.common.ui.screen.ClassroomScreen
 import com.dshagapps.tupanakuy.common.ui.screen.MainScreen
@@ -52,18 +53,18 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
     composable(
         route = AppScreen.Main.route,
         arguments = listOf(
-            navArgument(UID_ARGUMENT) { type = NavType.StringType }
+            navArgument(USER_UID_ARGUMENT) { type = NavType.StringType }
         )
     ) { backStackEntry ->
         val viewModel: MainScreenViewModel = hiltViewModel()
 
-        val uid = backStackEntry.arguments?.getString(UID_ARGUMENT)
-        requireNotNull(uid)
+        val userUid = backStackEntry.arguments?.getString(USER_UID_ARGUMENT)
+        requireNotNull(userUid)
 
         MainScreen(
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
-            onInitScreen = { viewModel.updateScreenData(uid) },
+            onInitScreen = { viewModel.updateScreenData(userUid) },
             onSignOutButtonClick = { viewModel.signOut() },
             onCreateClassroomButtonClick = { prevState ->
                 viewModel.createClassroom(prevState)
@@ -79,25 +80,28 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
                 navController.navigate(AppScreen.Auth.route)
             },
             goToClassroomScreen = { classroomUid ->
-                navController.navigate(AppScreen.Classroom.createRoute(classroomUid))
+                navController.navigate(AppScreen.Classroom.createRoute(userUid, classroomUid))
             }
         )
     }
     composable(
         route = AppScreen.Classroom.route,
         arguments = listOf(
-            navArgument(UID_ARGUMENT) { type = NavType.StringType }
+            navArgument(USER_UID_ARGUMENT) { type = NavType.StringType },
+            navArgument(CLASSROOM_UID_ARGUMENT) { type = NavType.StringType }
         )
     ) { backStackEntry ->
         val viewModel: ClassroomScreenViewModel = hiltViewModel()
 
-        val uid = backStackEntry.arguments?.getString(UID_ARGUMENT)
-        requireNotNull(uid)
+        val userUid = backStackEntry.arguments?.getString(USER_UID_ARGUMENT)
+        val classroomUid = backStackEntry.arguments?.getString(CLASSROOM_UID_ARGUMENT)
+        requireNotNull(userUid)
+        requireNotNull(classroomUid)
 
         ClassroomScreen(
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
-            onInitScreen = { viewModel.getClassroomByIdUseCase(uid) },
+            onInitScreen = { viewModel.getClassroomByIdUseCase(userUid, classroomUid) },
             onSendButtonClick = { prevState -> viewModel.sendMessageToChat(prevState) },
             goToPreviousScreen = { navController.popBackStack() }
         )
