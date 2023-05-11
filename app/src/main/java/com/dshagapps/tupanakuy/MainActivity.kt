@@ -39,7 +39,9 @@ class MainActivity : ComponentActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, insets ->
             val top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
-            val bottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val bottom =
+                insets.getInsets(WindowInsetsCompat.Type.ime()).bottom +
+                        insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
             view.updatePadding(top = top, bottom = bottom)
             insets
         }
