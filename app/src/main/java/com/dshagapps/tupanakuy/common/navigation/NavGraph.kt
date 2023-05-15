@@ -1,12 +1,11 @@
 package com.dshagapps.tupanakuy.common.navigation
 
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
+import androidx.navigation.*
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.CLASSROOM_SUBGRAPH_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.CLASSROOM_UID_ARGUMENT
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.MAIN_SUBGRAPH_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.USER_UID_ARGUMENT
 import com.dshagapps.tupanakuy.common.ui.screen.AuthScreen
 import com.dshagapps.tupanakuy.common.ui.screen.ClassroomScreen
@@ -17,7 +16,7 @@ import com.dshagapps.tupanakuy.common.ui.viewmodel.ClassroomScreenViewModel
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
 import com.dshagapps.tupanakuy.common.ui.viewmodel.SplashScreenViewModel
 
-fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
+fun NavGraphBuilder.addSplashScreen(navController: NavController) {
     composable(route = AppScreen.Splash.route) {
         val viewModel: SplashScreenViewModel = hiltViewModel()
         SplashScreen(
@@ -33,6 +32,9 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             }
         )
     }
+}
+
+fun NavGraphBuilder.addAuthScreen(navController: NavController) {
     composable(route = AppScreen.Auth.route) {
         val viewModel: AuthScreenViewModel = hiltViewModel()
         AuthScreen(
@@ -50,6 +52,9 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             }
         )
     }
+}
+
+fun NavGraphBuilder.addMainSubgraph(navController: NavController) {
     composable(
         route = AppScreen.Main.route,
         arguments = listOf(
@@ -84,6 +89,9 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             }
         )
     }
+}
+
+fun NavGraphBuilder.addClassroomSubgraph(navController: NavController) {
     composable(
         route = AppScreen.Classroom.route,
         arguments = listOf(
@@ -105,5 +113,25 @@ fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
             onSendButtonClick = { prevState -> viewModel.sendMessageToChat(prevState) },
             goToPreviousScreen = { navController.popBackStack() }
         )
+    }
+}
+
+fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
+    addSplashScreen(navController)
+
+    addAuthScreen(navController)
+
+    navigation(
+        route = MAIN_SUBGRAPH_ROUTE,
+        startDestination = AppScreen.Main.route
+    ) {
+        addMainSubgraph(navController)
+    }
+
+    navigation(
+        route = CLASSROOM_SUBGRAPH_ROUTE,
+        startDestination = AppScreen.Classroom.route
+    ) {
+        addClassroomSubgraph(navController)
     }
 }
