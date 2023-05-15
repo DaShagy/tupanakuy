@@ -19,21 +19,29 @@ import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
 import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.AuthScreenViewModel
+import com.dshagapps.tupanakuy.common.ui.viewmodel.AuthScreenViewModelType
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun AuthScreen(
+    type: AuthScreenViewModelType,
     state: StateFlow<AuthScreenViewModel.State>,
     updateState: (AuthScreenViewModel.State) -> Unit = {},
-    onSignUpButtonClick: (String, String) -> Unit = { _, _ -> },
-    onSignInButtonClick: (String, String) -> Unit = { _, _ -> },
+    onFormButtonClick: (AuthScreenViewModel.State.AuthForm) -> Unit = {},
+    onChangeScreenButtonClick: () -> Unit = {},
     goToMainScreen: (String) -> Unit = {}
 ) {
     val context: Context = LocalContext.current
 
+    val authFormState = AuthScreenViewModel.State.AuthForm(
+        type = type,
+        onFormButtonClick = { prevState -> updateState(AuthScreenViewModel.State.OnFormButtonClick(prevState)) },
+        onChangeScreenButtonClick = { updateState(AuthScreenViewModel.State.OnChangeScreenButtonClick) }
+    )
+
     OnLifecycleEvent { _, event ->
         when (event){
-            Lifecycle.Event.ON_RESUME -> updateState(AuthScreenViewModel.State.DrawAuthForm.loginForm(updateState))
+            Lifecycle.Event.ON_RESUME -> updateState(authFormState)
             else -> Unit
         }
     }
@@ -43,31 +51,33 @@ fun AuthScreen(
             Loader()
         }
         is AuthScreenViewModel.State.OnError -> {
+            AuthForm(state = s.prevState)
             Toast.makeText(context, s.exception.message, Toast.LENGTH_SHORT).show()
-            updateState(AuthScreenViewModel.State.DrawAuthForm.loginForm(updateState))
         }
         is AuthScreenViewModel.State.OnSuccess -> {
             LaunchedEffect(Unit) {
                 goToMainScreen(s.user.uid)
             }
         }
-        is AuthScreenViewModel.State.OnSignInButtonClick -> {
-            onSignInButtonClick(s.email, s.password)
+        is AuthScreenViewModel.State.OnFormButtonClick -> {
+            onFormButtonClick(s.prevState)
         }
-        is AuthScreenViewModel.State.OnSignUpButtonClick -> {
-            onSignUpButtonClick(s.email, s.password)
+        is AuthScreenViewModel.State.OnChangeScreenButtonClick -> {
+            LaunchedEffect(Unit) {
+                onChangeScreenButtonClick()
+            }
         }
-        is AuthScreenViewModel.State.DrawAuthForm -> {
+        is AuthScreenViewModel.State.AuthForm -> {
             AuthForm(state = s)
         }
     }
 }
 
 @Composable
-fun AuthForm(state: AuthScreenViewModel.State.DrawAuthForm) {
+fun AuthForm(state: AuthScreenViewModel.State.AuthForm) {
     BaseScreen(
         title = stringResource(id = R.string.app_name),
-        buttonStates = state.screenButtonStates
+        buttonStates = arrayOf(state.changeScreenButtonState)
     ) {
         Box(
             modifier = Modifier

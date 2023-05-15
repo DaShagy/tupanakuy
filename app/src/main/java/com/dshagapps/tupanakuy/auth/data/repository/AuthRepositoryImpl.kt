@@ -14,6 +14,10 @@ class AuthRepositoryImpl(private val auth: FirebaseAuth): AuthRepository {
     }
 
     override fun signUp(email: String, password: String, onCompleteListener: (OperationResult<User>) -> Unit) {
+        if (email.isEmpty() || password.isEmpty()) {
+            onCompleteListener(OperationResult.Failure(Exception("Email or password are empty")))
+            return
+        }
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 auth.currentUser?.let {
@@ -30,6 +34,10 @@ class AuthRepositoryImpl(private val auth: FirebaseAuth): AuthRepository {
     }
 
     override fun signIn(email: String, password: String, onCompleteListener: (OperationResult<User>) -> Unit) {
+        if (email.isEmpty() || password.isEmpty()) {
+            onCompleteListener(OperationResult.Failure(Exception("Email or password are empty")))
+            return
+        }
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 auth.currentUser?.let {

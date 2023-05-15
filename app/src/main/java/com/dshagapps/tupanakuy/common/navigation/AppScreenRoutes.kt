@@ -1,8 +1,9 @@
 package com.dshagapps.tupanakuy.common.navigation
 
-import com.dshagapps.tupanakuy.common.navigation.AppRoutes.AUTH_SCREEN_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.CLASSROOM_SCREEN_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.MAIN_SCREEN_ROUTE
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.SIGN_IN_SCREEN_ROUTE
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.SIGN_UP_SCREEN_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.SPLASH_SCREEN_ROUTE
 
 object AppRoutes {
@@ -13,11 +14,14 @@ object AppRoutes {
 
     // Screen routes
     const val SPLASH_SCREEN_ROUTE = "splash"
-    const val AUTH_SCREEN_ROUTE = "auth"
 
     // Subgraph routes
     const val MAIN_SUBGRAPH_ROUTE = "main"
+    const val AUTH_SUBGRAPH_ROUTE = "auth"
     const val CLASSROOM_SUBGRAPH_ROUTE = "classroom"
+
+    const val SIGN_IN_SCREEN_ROUTE = "$AUTH_SUBGRAPH_ROUTE/signIn"
+    const val SIGN_UP_SCREEN_ROUTE = "$AUTH_SUBGRAPH_ROUTE/signUp"
 
     const val MAIN_SCREEN_ROUTE =
         "$MAIN_SUBGRAPH_ROUTE/$USER_UID_ARGUMENT={$USER_UID_ARGUMENT}"
@@ -27,7 +31,8 @@ object AppRoutes {
 
 sealed class AppScreen(val route: String) {
     object Splash: AppScreen(SPLASH_SCREEN_ROUTE)
-    object Auth: AppScreen(AUTH_SCREEN_ROUTE)
+    object SignIn: AppScreen(SIGN_IN_SCREEN_ROUTE)
+    object SignUp: AppScreen(SIGN_UP_SCREEN_ROUTE)
     object Main: AppScreen(MAIN_SCREEN_ROUTE) {
         fun createRoute(userUid: String) =
             AppRoutes.MAIN_SUBGRAPH_ROUTE +

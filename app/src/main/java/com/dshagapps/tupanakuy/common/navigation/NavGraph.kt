@@ -3,6 +3,7 @@ package com.dshagapps.tupanakuy.common.navigation
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.*
 import androidx.navigation.compose.composable
+import com.dshagapps.tupanakuy.common.navigation.AppRoutes.AUTH_SUBGRAPH_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.CLASSROOM_SUBGRAPH_ROUTE
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.CLASSROOM_UID_ARGUMENT
 import com.dshagapps.tupanakuy.common.navigation.AppRoutes.MAIN_SUBGRAPH_ROUTE
@@ -11,10 +12,7 @@ import com.dshagapps.tupanakuy.common.ui.screen.AuthScreen
 import com.dshagapps.tupanakuy.common.ui.screen.ClassroomScreen
 import com.dshagapps.tupanakuy.common.ui.screen.MainScreen
 import com.dshagapps.tupanakuy.common.ui.screen.SplashScreen
-import com.dshagapps.tupanakuy.common.ui.viewmodel.AuthScreenViewModel
-import com.dshagapps.tupanakuy.common.ui.viewmodel.ClassroomScreenViewModel
-import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
-import com.dshagapps.tupanakuy.common.ui.viewmodel.SplashScreenViewModel
+import com.dshagapps.tupanakuy.common.ui.viewmodel.*
 
 fun NavGraphBuilder.addSplashScreen(navController: NavController) {
     composable(route = AppScreen.Splash.route) {
@@ -24,7 +22,7 @@ fun NavGraphBuilder.addSplashScreen(navController: NavController) {
             checkAuthState = { viewModel.checkAuthState() },
             goToAuthScreen = {
                 navController.popBackStack()
-                navController.navigate(AppScreen.Auth.route)
+                navController.navigate(AppScreen.SignIn.route)
             },
             goToMainScreen = { uid ->
                 navController.popBackStack()
@@ -34,17 +32,38 @@ fun NavGraphBuilder.addSplashScreen(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.addAuthScreen(navController: NavController) {
-    composable(route = AppScreen.Auth.route) {
-        val viewModel: AuthScreenViewModel = hiltViewModel()
+fun NavGraphBuilder.addAuthSubgraph(navController: NavController) {
+    composable(route = AppScreen.SignIn.route) {
+        val viewModel: SignInScreenViewModel = hiltViewModel()
         AuthScreen(
+            type = viewModel.getViewModelType(),
             state = viewModel.state,
             updateState = { newState -> viewModel.updateState(newState) },
-            onSignUpButtonClick = { email, password ->
-                viewModel.signUp(email, password)
+            onFormButtonClick = { prevState ->
+                viewModel.auth(prevState)
             },
-            onSignInButtonClick = { email, password ->
-                viewModel.signIn(email, password)
+            onChangeScreenButtonClick = {
+                navController.popBackStack()
+                navController.navigate(AppScreen.SignUp.route)
+            },
+            goToMainScreen = { uid ->
+                navController.popBackStack()
+                navController.navigate(AppScreen.Main.createRoute(uid))
+            }
+        )
+    }
+    composable(route = AppScreen.SignUp.route) {
+        val viewModel: SignUpScreenViewModel = hiltViewModel()
+        AuthScreen(
+            type = viewModel.getViewModelType(),
+            state = viewModel.state,
+            updateState = { newState -> viewModel.updateState(newState) },
+            onFormButtonClick = { prevState ->
+                viewModel.auth(prevState)
+            },
+            onChangeScreenButtonClick = {
+                navController.popBackStack()
+                navController.navigate(AppScreen.SignIn.route)
             },
             goToMainScreen = { uid ->
                 navController.popBackStack()
@@ -82,7 +101,7 @@ fun NavGraphBuilder.addMainSubgraph(navController: NavController) {
             },
             goToAuthScreen = {
                 navController.popBackStack()
-                navController.navigate(AppScreen.Auth.route)
+                navController.navigate(AppScreen.SignIn.route)
             },
             goToClassroomScreen = { classroomUid ->
                 navController.navigate(AppScreen.Classroom.createRoute(userUid, classroomUid))
@@ -119,7 +138,12 @@ fun NavGraphBuilder.addClassroomSubgraph(navController: NavController) {
 fun NavGraphBuilder.addFeedScreenGraph(navController: NavController) {
     addSplashScreen(navController)
 
-    addAuthScreen(navController)
+    navigation(
+        route = AUTH_SUBGRAPH_ROUTE,
+        startDestination = AppScreen.SignIn.route
+    ) {
+        addAuthSubgraph(navController)
+    }
 
     navigation(
         route = MAIN_SUBGRAPH_ROUTE,
