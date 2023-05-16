@@ -1,5 +1,6 @@
 package com.dshagapps.tupanakuy.common.navigation.subgraphs
 
+import androidx.activity.compose.BackHandler
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -34,6 +35,11 @@ object ClassroomSubgraph {
             val classroomUid = backStackEntry.arguments?.getString(AppRoutesArguments.CLASSROOM_UID_ARGUMENT)
             requireNotNull(userUid)
             requireNotNull(classroomUid)
+
+            BackHandler {
+                navController.popBackStack()
+                viewModel.removeChatObserver()
+            }
 
             ClassroomScreen(
                 state = viewModel.state,

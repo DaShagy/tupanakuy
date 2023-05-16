@@ -60,6 +60,9 @@ object UseCaseModule {
     fun providesSendMessageToChatUseCase(repository: DataRepository) = SendMessageToChatUseCase(repository)
 
     @Provides
-    fun providesObserveChatUseCase(repository: DataRepository) = ObserveChatByIdUseCase(repository)
+    fun providesRegisterChatObserverUseCase(repository: DataRepository) = RegisterChatObserverUseCase(repository)
+
+    @Provides
+    fun providesRemoveChatObserverUseCase(repository: DataRepository) = RemoveChatObserverUseCase(repository)
     //endregion
 }

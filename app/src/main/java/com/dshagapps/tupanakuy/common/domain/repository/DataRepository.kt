@@ -1,10 +1,12 @@
 package com.dshagapps.tupanakuy.common.domain.repository
 
+import android.net.nsd.NsdManager.RegistrationListener
 import com.dshagapps.tupanakuy.common.domain.model.Chat
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
 import com.dshagapps.tupanakuy.common.domain.model.Message
 import com.dshagapps.tupanakuy.common.domain.model.User
 import com.dshagapps.tupanakuy.common.util.OperationResult
+import com.google.firebase.firestore.ListenerRegistration
 
 interface DataRepository {
     fun getUserInfo(uid: String, listener: (OperationResult<User>) -> Unit)
@@ -24,5 +26,6 @@ interface DataRepository {
         listener: (OperationResult<Classroom>) -> Unit
     )
     fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Message>) -> Unit)
-    fun setChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit)
+    fun registerChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit): ListenerRegistration
+    fun removeChatListener(listenerRegistration: ListenerRegistration)
 }

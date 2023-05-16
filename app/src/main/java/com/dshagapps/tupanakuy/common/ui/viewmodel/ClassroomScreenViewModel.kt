@@ -6,10 +6,12 @@ import com.dshagapps.tupanakuy.common.domain.model.Chat
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
 import com.dshagapps.tupanakuy.common.domain.model.Message
 import com.dshagapps.tupanakuy.common.domain.use_case.GetClassroomByIdUseCase
-import com.dshagapps.tupanakuy.common.domain.use_case.ObserveChatByIdUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.RegisterChatObserverUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.RemoveChatObserverUseCase
 import com.dshagapps.tupanakuy.common.domain.use_case.SendMessageToChatUseCase
 import com.dshagapps.tupanakuy.common.ui.util.TextFieldState
 import com.dshagapps.tupanakuy.common.util.OperationResult
+import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,11 +24,14 @@ import javax.inject.Inject
 class ClassroomScreenViewModel @Inject constructor(
     private val getClassroomByIdUseCase: GetClassroomByIdUseCase,
     private val sendMessageToChatUseCase: SendMessageToChatUseCase,
-    private val observeChatByIdUseCase: ObserveChatByIdUseCase
+    private val registerChatObserverUseCase: RegisterChatObserverUseCase,
+    private val removeChatObserverUseCase: RemoveChatObserverUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
     val state: StateFlow<State> get() = _state
+
+    private var _registrationListener: ListenerRegistration? = null
 
     fun updateState(newState: State) {
         _state.value = newState
@@ -38,8 +43,7 @@ class ClassroomScreenViewModel @Inject constructor(
             getClassroomByIdUseCase(classroomUid) { classroomResult ->
                 when (classroomResult) {
                     is OperationResult.Failure -> updateState(State.OnError(classroomResult.exception))
-                    is OperationResult.Success -> {
-                        observeChatByIdUseCase(classroomResult.data.chatUID) { chatResult ->
+                    is OperationResult.Success -> { _registrationListener = registerChatObserverUseCase(classroomResult.data.chatUID) { chatResult ->
                             when (chatResult) {
                                 is OperationResult.Failure -> updateState(State.OnError(chatResult.exception))
                                 is OperationResult.Success -> updateState(
@@ -66,6 +70,10 @@ class ClassroomScreenViewModel @Inject constructor(
                 is OperationResult.Success -> Unit
             }
         }
+    }
+
+    fun removeChatObserver() = viewModelScope.launch(Dispatchers.IO) {
+        _registrationListener?.let { listener -> removeChatObserverUseCase(listener) }
     }
 
     sealed class State {

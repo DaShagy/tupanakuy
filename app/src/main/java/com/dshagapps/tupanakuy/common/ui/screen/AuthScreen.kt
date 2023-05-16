@@ -19,12 +19,11 @@ import com.dshagapps.tupanakuy.common.ui.component.loader.Loader
 import com.dshagapps.tupanakuy.common.ui.component.screen.BaseScreen
 import com.dshagapps.tupanakuy.common.ui.util.OnLifecycleEvent
 import com.dshagapps.tupanakuy.common.ui.viewmodel.AuthScreenViewModel
-import com.dshagapps.tupanakuy.common.ui.viewmodel.AuthScreenViewModelType
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun AuthScreen(
-    type: AuthScreenViewModelType,
+    type: AuthScreenViewModel.Type,
     state: StateFlow<AuthScreenViewModel.State>,
     updateState: (AuthScreenViewModel.State) -> Unit = {},
     onFormButtonClick: (AuthScreenViewModel.State.AuthForm) -> Unit = {},

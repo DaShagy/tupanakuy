@@ -16,11 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-sealed class AuthScreenViewModelType {
-    object SignIn: AuthScreenViewModelType()
-    object SignUp: AuthScreenViewModelType()
-}
-
 abstract class AuthScreenViewModel(
     private val authUseCase: AuthUseCase,
     private val signOutUseCase: SignOutUseCase,
@@ -30,7 +25,7 @@ abstract class AuthScreenViewModel(
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
     val state: StateFlow<State> get() = _state
 
-    abstract fun getViewModelType(): AuthScreenViewModelType
+    abstract fun getViewModelType(): Type
 
     fun updateState(newState: State){
         _state.value = newState
@@ -68,7 +63,7 @@ abstract class AuthScreenViewModel(
         data class OnFormButtonClick(val prevState: AuthForm): State()
         object OnChangeScreenButtonClick: State()
        data class AuthForm(
-           private val type: AuthScreenViewModelType,
+           private val type: Type,
            private val onFormButtonClick: (AuthForm) -> Unit,
            private val onChangeScreenButtonClick: () -> Unit
        ): State() {
@@ -82,15 +77,15 @@ abstract class AuthScreenViewModel(
             )
             val formButtonState: ButtonState = ButtonState(
                 label = when (type) {
-                    AuthScreenViewModelType.SignIn -> SIGN_IN_LABEL
-                    AuthScreenViewModelType.SignUp -> SIGN_UP_LABEL
+                    Type.SignIn -> SIGN_IN_LABEL
+                    Type.SignUp -> SIGN_UP_LABEL
                 },
                 onClick = { onFormButtonClick(this) }
             )
             val changeScreenButtonState: ButtonState = ButtonState(
                 label = when (type) {
-                    AuthScreenViewModelType.SignIn -> CHANGE_TO_SIGN_UP_LABEL
-                    AuthScreenViewModelType.SignUp -> CHANGE_TO_SIGN_IN_LABEL
+                    Type.SignIn -> CHANGE_TO_SIGN_UP_LABEL
+                    Type.SignUp -> CHANGE_TO_SIGN_IN_LABEL
                 },
                 onClick = { onChangeScreenButtonClick() }
             )
@@ -104,5 +99,10 @@ abstract class AuthScreenViewModel(
             private const val CHANGE_TO_SIGN_IN_LABEL = "Change to sign in"
             private const val CHANGE_TO_SIGN_UP_LABEL = "Change to sign up"
         }
+    }
+
+    sealed class Type {
+        object SignIn: Type()
+        object SignUp: Type()
     }
 }

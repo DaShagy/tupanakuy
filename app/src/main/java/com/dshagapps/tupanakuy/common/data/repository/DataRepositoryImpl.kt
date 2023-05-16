@@ -14,6 +14,7 @@ import com.dshagapps.tupanakuy.common.util.OperationResult
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataRepository {
     override fun getUserInfo(uid: String, listener: (OperationResult<User>) -> Unit) {
@@ -141,7 +142,11 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
         }
     }
 
-    override fun setChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit) {
-        firestore.collection("chats").document(chatUid).observeDomainEntity(chatListener)
+    override fun registerChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit): ListenerRegistration {
+        return firestore.collection("chats").document(chatUid).observeDomainEntity(chatListener)
+    }
+
+    override fun removeChatListener(listenerRegistration: ListenerRegistration) {
+        listenerRegistration.remove()
     }
 }

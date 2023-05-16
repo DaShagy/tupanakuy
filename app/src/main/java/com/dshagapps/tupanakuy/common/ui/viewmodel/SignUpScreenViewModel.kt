@@ -16,6 +16,6 @@ class SignUpScreenViewModel @Inject constructor(
     signOutUseCase,
     setUserInfoIfNotExistsUseCase
 ) {
-    override fun getViewModelType(): AuthScreenViewModelType =
-        AuthScreenViewModelType.SignUp
+    override fun getViewModelType(): Type =
+        Type.SignUp
 }
