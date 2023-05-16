@@ -14,8 +14,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.dshagapps.tupanakuy.common.navigation.AppScreen
-import com.dshagapps.tupanakuy.common.navigation.addFeedScreenGraph
+import com.dshagapps.tupanakuy.common.navigation.AppNavGraph.addFeedScreenGraph
+import com.dshagapps.tupanakuy.common.navigation.subgraphs.SplashSubgraph
 import com.dshagapps.tupanakuy.common.ui.theme.TupanakuyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -53,7 +53,7 @@ fun App() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Splash.route
+        startDestination = SplashSubgraph.Screen.Splash.route
     ) {
         addFeedScreenGraph(navController)
     }
