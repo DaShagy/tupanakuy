@@ -7,10 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -30,6 +27,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.dshagapps.tupanakuy.R
 import com.dshagapps.tupanakuy.common.navigation.AppRoutesArguments
 import com.dshagapps.tupanakuy.common.ui.screen.ClassroomChatScreen
 import com.dshagapps.tupanakuy.common.ui.screen.ClassroomScreen
@@ -85,14 +83,14 @@ object ClassroomSubgraph {
                         navController.popBackStack()
                         navController.navigateToClassroomScreen(userUid, classroomUid)
                     }) {
-                        Icon(imageVector = Icons.Default.Person, contentDescription = "Main Classroom")
+                        Icon(painter = painterResource(id = R.drawable.ic_groups), contentDescription = "Main Classroom")
                     }
                     Spacer(modifier = Modifier.padding(8.dp))
                     IconButton(onClick = {
                         navController.popBackStack()
                         navController.navigateToClassroomChatScreen(userUid, classroomUid)
                     }) {
-                        Icon(imageVector = Icons.Default.Send, contentDescription = "Chat")
+                        Icon(painter = painterResource(id = R.drawable.ic_chat_bubble), contentDescription = "Chat")
                     }
                 }
             }

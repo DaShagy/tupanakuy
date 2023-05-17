@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
-import com.dshagapps.tupanakuy.common.ui.component.button.StateButton
+import com.dshagapps.tupanakuy.common.ui.component.button.StateIconButton
 import com.dshagapps.tupanakuy.common.ui.component.form.StateTextField
 import com.dshagapps.tupanakuy.common.ui.component.screen.ChatScreenId.CONTENT_LAYOUT_ID
 import com.dshagapps.tupanakuy.common.ui.component.screen.ChatScreenId.MESSAGE_INPUT_LAYOUT_ID
@@ -50,7 +50,7 @@ fun ChatScreen(
                     .padding(4.dp),
                 state = messageFieldState
             )
-            StateButton(sendMessageButtonState)
+            StateIconButton(sendMessageButtonState)
         }
     }
 }
