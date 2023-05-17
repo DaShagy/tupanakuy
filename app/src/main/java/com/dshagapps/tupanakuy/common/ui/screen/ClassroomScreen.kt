@@ -39,17 +39,18 @@ fun ClassroomScreen(
     
     when (val s = state.collectAsState().value) {
         is ClassroomScreenViewModel.State.Idle -> {
-            val classroomUserList = listOf(s.classroom.teacherUID) + s.classroom.studentUIDs
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                itemsIndexed(classroomUserList) { index, user ->
-                    Text(text = "UserUID: $user")
-                    if (index == 0) {
-                        Spacer(modifier = Modifier.padding(24.dp))
-                    } else {
-                        Spacer(modifier = Modifier.padding(8.dp))
-                    }
+                items(listOf(s.teacher)) { teacher ->
+                    Text(text = "TeacherUID: ${teacher.uid}")
+                    Text(text = "Name: ${teacher.displayName}")
+                    Spacer(modifier = Modifier.padding(24.dp))
+                }
+                items(s.students) {student ->
+                    Text(text = "StudentUID: ${student.uid}")
+                    Text(text = "Name: ${student.displayName}")
+                    Spacer(modifier = Modifier.padding(8.dp))
                 }
             }
         }

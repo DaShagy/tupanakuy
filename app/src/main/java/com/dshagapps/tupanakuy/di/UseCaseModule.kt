@@ -64,5 +64,8 @@ object UseCaseModule {
 
     @Provides
     fun providesRemoveChatObserverUseCase(repository: DataRepository) = RemoveChatObserverUseCase(repository)
+    
+    @Provides
+    fun provideGetClassroomUsersInfoUseCase(repository: DataRepository) = GetClassroomUsersInfoUseCase(repository)
     //endregion
 }

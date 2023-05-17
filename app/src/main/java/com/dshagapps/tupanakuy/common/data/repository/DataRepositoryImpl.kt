@@ -13,6 +13,7 @@ import com.dshagapps.tupanakuy.common.domain.repository.DataRepository
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
@@ -148,5 +149,12 @@ class DataRepositoryImpl(private val firestore: FirebaseFirestore): DataReposito
 
     override fun removeChatListener(listenerRegistration: ListenerRegistration) {
         listenerRegistration.remove()
+    }
+
+    override fun getUsersInfo(
+        userUIDs: List<String>,
+        listener: (OperationResult<List<User>>) -> Unit
+    ) {
+        firestore.collection("users").whereIn("uid", userUIDs).getDomainEntities(listener)
     }
 }

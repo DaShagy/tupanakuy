@@ -3,7 +3,10 @@ package com.dshagapps.tupanakuy.common.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dshagapps.tupanakuy.common.domain.model.Classroom
+import com.dshagapps.tupanakuy.common.domain.model.User
+import com.dshagapps.tupanakuy.common.domain.model.enum.UserType
 import com.dshagapps.tupanakuy.common.domain.use_case.GetClassroomByIdUseCase
+import com.dshagapps.tupanakuy.common.domain.use_case.GetClassroomUsersInfoUseCase
 import com.dshagapps.tupanakuy.common.util.OperationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ClassroomScreenViewModel @Inject constructor(
-    private val getClassroomByIdUseCase: GetClassroomByIdUseCase
+    private val getClassroomByIdUseCase: GetClassroomByIdUseCase,
+    private val getClassroomUsersInfoUseCase: GetClassroomUsersInfoUseCase
 ): ViewModel() {
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Loading)
@@ -31,7 +35,23 @@ class ClassroomScreenViewModel @Inject constructor(
             getClassroomByIdUseCase(classroomUid) { classroomResult ->
                 when (classroomResult) {
                     is OperationResult.Failure -> updateState(State.OnError(classroomResult.exception))
-                    is OperationResult.Success -> updateState(State.Idle(currentUserUID, classroomResult.data))
+                    is OperationResult.Success -> {
+                        getClassroomUsersInfoUseCase(
+                            listOf(classroomResult.data.teacherUID) + classroomResult.data.studentUIDs
+                        ) { usersResult ->
+                            when (usersResult) {
+                                is OperationResult.Failure -> updateState(State.OnError(usersResult.exception))
+                                is OperationResult.Success -> updateState(
+                                    State.Idle(
+                                        currentUserUID,
+                                        classroomResult.data,
+                                        usersResult.data.first { user -> user.userType == UserType.TEACHER },
+                                        usersResult.data.filterNot { user -> user.userType == UserType.TEACHER }
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -41,7 +61,9 @@ class ClassroomScreenViewModel @Inject constructor(
         object Loading: State()
         data class Idle(
             val currentUserUID: String,
-            val classroom: Classroom
+            val classroom: Classroom,
+            val teacher: User,
+            val students: List<User>
         ): State()
         data class OnError(val exception: Exception): State()
     }

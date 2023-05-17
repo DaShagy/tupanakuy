@@ -28,4 +28,5 @@ interface DataRepository {
     fun sendMessageToChat(message: Message, chatUid: String, listener: (OperationResult<Message>) -> Unit)
     fun registerChatListener(chatUid: String, chatListener: (OperationResult<Chat>) -> Unit): ListenerRegistration
     fun removeChatListener(listenerRegistration: ListenerRegistration)
+    fun getUsersInfo(userUIDs: List<String> = listOf(), listener: (OperationResult<List<User>>) -> Unit)
 }
