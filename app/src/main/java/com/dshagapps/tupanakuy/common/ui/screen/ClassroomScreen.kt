@@ -4,7 +4,11 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,10 +39,18 @@ fun ClassroomScreen(
     
     when (val s = state.collectAsState().value) {
         is ClassroomScreenViewModel.State.Idle -> {
-            Column {
-                Text(text = "UserUID: ${s.currentUserUID}")
-                Spacer(modifier = Modifier.padding(8.dp))
-                Text("Classroom: ${s.classroom}")
+            val classroomUserList = listOf(s.classroom.teacherUID) + s.classroom.studentUIDs
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                itemsIndexed(classroomUserList) { index, user ->
+                    Text(text = "UserUID: $user")
+                    if (index == 0) {
+                        Spacer(modifier = Modifier.padding(24.dp))
+                    } else {
+                        Spacer(modifier = Modifier.padding(8.dp))
+                    }
+                }
             }
         }
         ClassroomScreenViewModel.State.Loading -> Loader()
