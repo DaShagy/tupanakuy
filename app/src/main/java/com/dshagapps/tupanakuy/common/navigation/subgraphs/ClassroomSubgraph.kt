@@ -1,6 +1,28 @@
 package com.dshagapps.tupanakuy.common.navigation.subgraphs
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallTopAppBar
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -29,7 +51,64 @@ object ClassroomSubgraph {
                 "/${AppRoutesArguments.USER_UID_ARGUMENT}={${AppRoutesArguments.USER_UID_ARGUMENT}}" +
                 "&${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}={${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}}"
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun ClassroomScreenScaffold(
+        navController: NavController,
+        userUid: String,
+        classroomUid: String,
+        content: @Composable  () -> Unit
+    ) {
+        Scaffold(
+            topBar = {
+                SmallTopAppBar(
+                    title = { Text("Classroom") },
+                    colors = TopAppBarDefaults.smallTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Go back")
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                BottomAppBar(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                        navController.navigateToClassroomScreen(userUid, classroomUid)
+                    }) {
+                        Icon(imageVector = Icons.Default.Person, contentDescription = "Main Classroom")
+                    }
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                        navController.navigateToClassroomChatScreen(userUid, classroomUid)
+                    }) {
+                        Icon(imageVector = Icons.Default.Send, contentDescription = "Chat")
+                    }
+                }
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = it)
+            ) {
+                content()
+            }
+        }
+    }
+
     private fun NavGraphBuilder.addClassroomSubgraph(navController: NavController) {
+
         composable(
             route = Screen.Classroom.route,
             arguments = listOf(
@@ -44,7 +123,18 @@ object ClassroomSubgraph {
             requireNotNull(userUid)
             requireNotNull(classroomUid)
 
-            ClassroomScreen()
+            ClassroomScreenScaffold(navController, userUid, classroomUid) {
+                ClassroomScreen(
+                    state = viewModel.state,
+                    updateState = viewModel::updateState,
+                    onInitScreen = {
+                        viewModel.getClassroomByIdUseCase(
+                            userUid,
+                            classroomUid
+                        )
+                    }
+                )
+            }
         }
 
         composable(
@@ -66,13 +156,15 @@ object ClassroomSubgraph {
                 viewModel.removeChatObserver()
             }
 
-            ClassroomChatScreen(
-                state = viewModel.state,
-                updateState = { newState -> viewModel.updateState(newState) },
-                onInitScreen = { viewModel.getClassroomByIdUseCase(userUid, classroomUid) },
-                onSendButtonClick = { prevState -> viewModel.sendMessageToChat(prevState) },
-                goToPreviousScreen = { navController.popBackStack() }
-            )
+            ClassroomScreenScaffold(navController, userUid, classroomUid)  {
+                ClassroomChatScreen(
+                    state = viewModel.state,
+                    updateState = { newState -> viewModel.updateState(newState) },
+                    onInitScreen = { viewModel.getClassroomByIdUseCase(userUid, classroomUid) },
+                    onSendButtonClick = { prevState -> viewModel.sendMessageToChat(prevState) },
+                    goToPreviousScreen = { navController.popBackStack() }
+                )
+            }
         }
     }
 
