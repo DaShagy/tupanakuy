@@ -12,10 +12,10 @@ import com.dshagapps.tupanakuy.common.ui.viewmodel.SignUpScreenViewModel
 
 object AuthSubgraph {
 
-    private const val AUTH_SUBGRAPH_ROUTE = "auth"
+    private const val BASE_ROUTE = "auth"
 
-    private const val SIGN_IN_SCREEN_ROUTE = "$AUTH_SUBGRAPH_ROUTE/signIn"
-    private const val SIGN_UP_SCREEN_ROUTE = "$AUTH_SUBGRAPH_ROUTE/signUp"
+    private const val SIGN_IN_SCREEN_ROUTE = "$BASE_ROUTE/signIn"
+    private const val SIGN_UP_SCREEN_ROUTE = "$BASE_ROUTE/signUp"
 
     private fun NavGraphBuilder.addAuthSubgraph(navController: NavController) {
         composable(route = Screen.SignIn.route) {
@@ -60,7 +60,7 @@ object AuthSubgraph {
 
     fun NavGraphBuilder.addAuthSubgraphNavigation(navController: NavController) {
         navigation(
-            route = AUTH_SUBGRAPH_ROUTE,
+            route = BASE_ROUTE,
             startDestination = Screen.SignIn.route
         ) {
             addAuthSubgraph(navController)

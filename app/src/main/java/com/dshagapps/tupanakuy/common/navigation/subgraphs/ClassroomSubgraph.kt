@@ -16,17 +16,16 @@ import com.dshagapps.tupanakuy.common.ui.viewmodel.ClassroomScreenViewModel
 
 object ClassroomSubgraph {
 
-    private const val CLASSROOM_SUBGRAPH_ROUTE = "classroom"
+    private const val BASE_ROUTE = "classroom"
+    private const val CHAT_ROUTE = "$BASE_ROUTE/chat"
 
-    private const val CLASSROOM_CHAT_ROUTE = "$CLASSROOM_SUBGRAPH_ROUTE/chat"
-
-    private const val CLASSROOM_SCREEN_ROUTE =
-        CLASSROOM_SUBGRAPH_ROUTE +
+    private const val BASE_SCREEN_ROUTE =
+        BASE_ROUTE +
                 "/${AppRoutesArguments.USER_UID_ARGUMENT}={${AppRoutesArguments.USER_UID_ARGUMENT}}" +
                 "&${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}={${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}}"
 
-    private const val CLASSROOM_CHAT_SCREEN_ROUTE =
-        CLASSROOM_CHAT_ROUTE +
+    private const val CHAT_SCREEN_ROUTE =
+        CHAT_ROUTE +
                 "/${AppRoutesArguments.USER_UID_ARGUMENT}={${AppRoutesArguments.USER_UID_ARGUMENT}}" +
                 "&${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}={${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}}"
 
@@ -79,7 +78,7 @@ object ClassroomSubgraph {
 
     fun NavGraphBuilder.addClassroomSubgraphNavigation(navController: NavController) {
         navigation(
-            route = CLASSROOM_SUBGRAPH_ROUTE,
+            route = BASE_ROUTE,
             startDestination = Screen.Classroom.route
         ) {
             addClassroomSubgraph(navController)
@@ -95,16 +94,16 @@ object ClassroomSubgraph {
     }
 
     sealed class Screen(val route: String) {
-        object Classroom: Screen(CLASSROOM_SCREEN_ROUTE) {
+        object Classroom: Screen(BASE_SCREEN_ROUTE) {
             fun createRoute(userUid: String, classroomUid: String) =
-                CLASSROOM_SUBGRAPH_ROUTE +
+                BASE_ROUTE +
                         "/${AppRoutesArguments.USER_UID_ARGUMENT}=$userUid" +
                         "&${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}=$classroomUid"
         }
 
-        object ClassroomChat: Screen(CLASSROOM_CHAT_SCREEN_ROUTE) {
+        object ClassroomChat: Screen(CHAT_SCREEN_ROUTE) {
             fun createRoute(userUid: String, classroomUid: String) =
-                CLASSROOM_CHAT_ROUTE +
+                CHAT_ROUTE +
                         "/${AppRoutesArguments.USER_UID_ARGUMENT}=$userUid" +
                         "&${AppRoutesArguments.CLASSROOM_UID_ARGUMENT}=$classroomUid"
         }
