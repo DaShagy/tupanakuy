@@ -10,6 +10,7 @@ import androidx.navigation.navigation
 import com.dshagapps.tupanakuy.common.navigation.AppRoutesArguments
 import com.dshagapps.tupanakuy.common.navigation.subgraphs.AuthSubgraph.navigateToSignInScreen
 import com.dshagapps.tupanakuy.common.navigation.subgraphs.ClassroomSubgraph.navigateToClassroomScreen
+import com.dshagapps.tupanakuy.common.navigation.subgraphs.ProfileSubgraph.navigateToProfileScreen
 import com.dshagapps.tupanakuy.common.ui.screen.MainScreen
 import com.dshagapps.tupanakuy.common.ui.viewmodel.MainScreenViewModel
 
@@ -53,6 +54,9 @@ object MainSubgraph {
                 },
                 goToClassroomScreen = { classroomUid ->
                     navController.navigateToClassroomScreen(userUid, classroomUid)
+                },
+                goToProfileScreen = {
+                    navController.navigateToProfileScreen(userUid)
                 }
             )
         }

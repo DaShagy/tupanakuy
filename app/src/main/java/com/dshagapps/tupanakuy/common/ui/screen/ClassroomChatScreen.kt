@@ -94,7 +94,9 @@ fun ClassroomChatScreen(
                                 .fillMaxWidth(0.7f)
                                 .wrapContentWidth(if (message.authorUID == state.currentUserUID) Alignment.End else Alignment.Start)
                         ) {
-                            Text(message.content)
+                            Row(modifier = Modifier.padding(4.dp)) {
+                                Text(message.content)
+                            }
                         }
                     }
                 }
